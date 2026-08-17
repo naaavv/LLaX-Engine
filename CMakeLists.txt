@@ -57,33 +57,7 @@ FetchContent_Declare(
     GIT_SHALLOW TRUE
 )
 
-# 4. EnTT (ECS)
-message(STATUS "[LLaX] Configuring EnTT...")
-set(ENTT_BUILD_TESTING OFF CACHE BOOL "" FORCE)
-set(ENTT_BUILD_DOCS OFF CACHE BOOL "" FORCE)
-FetchContent_Declare(
-    entt
-    GIT_REPOSITORY https://github.com/skypjack/entt.git
-    GIT_TAG v3.13.2
-    GIT_SHALLOW TRUE
-)
-
-# 5. Assimp (Open Asset Import Library)
-message(STATUS "[LLaX] Configuring Assimp...")
-set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
-set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
-set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
-set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "" FORCE)
-set(ASSIMP_NO_EXPORT ON CACHE BOOL "" FORCE)
-set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT ON CACHE BOOL "" FORCE)
-FetchContent_Declare(
-    assimp
-    GIT_REPOSITORY https://github.com/assimp/assimp.git
-    GIT_TAG v5.4.3
-    GIT_SHALLOW TRUE
-)
-
-# 6. spdlog (Fast C++ logging)
+# 4. spdlog (Fast C++ logging)
 message(STATUS "[LLaX] Configuring spdlog...")
 set(SPDLOG_BUILD_EXAMPLE OFF CACHE BOOL "" FORCE)
 set(SPDLOG_BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -94,7 +68,7 @@ FetchContent_Declare(
     GIT_SHALLOW TRUE
 )
 
-# 7. Dear ImGui (Docking branch - No CMakeLists in repo, populate manually)
+# 5. Dear ImGui (Docking branch)
 message(STATUS "[LLaX] Configuring Dear ImGui...")
 FetchContent_Declare(
     imgui
@@ -104,7 +78,7 @@ FetchContent_Declare(
 )
 
 message(STATUS "[LLaX] Fetching CMake dependencies...")
-FetchContent_MakeAvailable(glfw glad glm entt assimp spdlog)
+FetchContent_MakeAvailable(glfw glad glm spdlog)
 
 FetchContent_GetProperties(imgui)
 if(NOT imgui_POPULATED)

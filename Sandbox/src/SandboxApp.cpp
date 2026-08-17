@@ -1,15 +1,16 @@
 #include <LLaX.h>
 
-struct TransformComponent
+struct Transform
 {
     glm::vec3 Position{ 0.0f };
     glm::vec3 Rotation{ 0.0f };
     glm::vec3 Scale{ 1.0f };
 };
 
-struct TagComponent
+struct Object
 {
-    std::string Tag;
+    std::string Name;
+    Transform Transform;
 };
 
 class SandboxApp : public LLaX::Application
@@ -20,14 +21,9 @@ public:
     {
         LLAX_INFO("Sandbox Application Initialized!");
 
-        // Demo: Setup EnTT Entity Component System registry
-        auto camera = m_Registry.create();
-        m_Registry.emplace<TagComponent>(camera, "Main Camera");
-        m_Registry.emplace<TransformComponent>(camera, glm::vec3(0.0f, 0.0f, 5.0f));
-
-        auto light = m_Registry.create();
-        m_Registry.emplace<TagComponent>(light, "Directional Light");
-        m_Registry.emplace<TransformComponent>(light, glm::vec3(2.0f, 4.0f, 2.0f));
+        m_Objects.push_back({ "Main Camera", { glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f), glm::vec3(1.0f) } });
+        m_Objects.push_back({ "Player Quad", { glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f) } });
+        m_Objects.push_back({ "Directional Light", { glm::vec3(2.0f, 4.0f, 2.0f), glm::vec3(0.0f), glm::vec3(1.0f) } });
     }
 
     ~SandboxApp() override
@@ -41,18 +37,16 @@ protected:
         m_FrameTime = ts;
         m_FPS = ts > 0.0f ? 1.0f / ts : 0.0f;
 
-        // Input Polling Demo: Move first entity with WASD
-        auto view = m_Registry.view<TransformComponent>();
-        if (!view.empty())
+        // Move Player Quad with WASD keys
+        if (m_Objects.size() > 1)
         {
-            auto entity = view.front();
-            auto& transform = view.get<TransformComponent>(entity);
-            float speed = 2.5f * ts;
+            auto& playerTransform = m_Objects[1].Transform;
+            float speed = 3.0f * ts;
 
-            if (LLaX::Input::IsKeyPressed(LLaX::Key::W)) transform.Position.y += speed;
-            if (LLaX::Input::IsKeyPressed(LLaX::Key::S)) transform.Position.y -= speed;
-            if (LLaX::Input::IsKeyPressed(LLaX::Key::A)) transform.Position.x -= speed;
-            if (LLaX::Input::IsKeyPressed(LLaX::Key::D)) transform.Position.x += speed;
+            if (LLaX::Input::IsKeyPressed(LLaX::Key::W)) playerTransform.Position.y += speed;
+            if (LLaX::Input::IsKeyPressed(LLaX::Key::S)) playerTransform.Position.y -= speed;
+            if (LLaX::Input::IsKeyPressed(LLaX::Key::A)) playerTransform.Position.x -= speed;
+            if (LLaX::Input::IsKeyPressed(LLaX::Key::D)) playerTransform.Position.x += speed;
         }
 
         // Apply background clear color
@@ -76,7 +70,7 @@ protected:
         ImGui::Text("Input Polling:");
         glm::vec2 mousePos = LLaX::Input::GetMousePosition();
         ImGui::Text("  Mouse: (%.1f, %.1f)", mousePos.x, mousePos.y);
-        ImGui::Text("  Press [W/A/S/D] to move selected entity");
+        ImGui::Text("  Press [W/A/S/D] to move Player Quad");
 
         ImGui::Spacing();
         ImGui::Separator();
@@ -85,42 +79,35 @@ protected:
 
         ImGui::Spacing();
         ImGui::Separator();
-        ImGui::Text("EnTT Scene Hierarchy:");
-        
-        auto view = m_Registry.view<TagComponent, TransformComponent>();
-        for (auto entity : view)
-        {
-            auto& tag = view.get<TagComponent>(entity);
-            auto& transform = view.get<TransformComponent>(entity);
+        ImGui::Text("Scene Hierarchy (Objects):");
 
-            if (ImGui::TreeNode(tag.Tag.c_str()))
+        for (size_t i = 0; i < m_Objects.size(); ++i)
+        {
+            auto& obj = m_Objects[i];
+            if (ImGui::TreeNode((obj.Name + "##" + std::to_string(i)).c_str()))
             {
-                ImGui::DragFloat3("Position", &transform.Position.x, 0.05f);
-                ImGui::DragFloat3("Rotation", &transform.Rotation.x, 0.5f);
-                ImGui::DragFloat3("Scale", &transform.Scale.x, 0.05f);
+                ImGui::DragFloat3("Position", &obj.Transform.Position.x, 0.05f);
+                ImGui::DragFloat3("Rotation", &obj.Transform.Rotation.x, 0.5f);
+                ImGui::DragFloat3("Scale", &obj.Transform.Scale.x, 0.05f);
                 ImGui::TreePop();
             }
         }
 
-        if (ImGui::Button("+ Add Entity"))
+        if (ImGui::Button("+ Add Object"))
         {
-            auto e = m_Registry.create();
-            static int entityCount = 1;
-            m_Registry.emplace<TagComponent>(e, "Entity #" + std::to_string(entityCount++));
-            m_Registry.emplace<TransformComponent>(e);
+            static int objectCount = 1;
+            m_Objects.push_back({ "Object #" + std::to_string(objectCount++), {} });
         }
 
         ImGui::Spacing();
         ImGui::Separator();
-        ImGui::Text("Integrated Vendor Libraries:");
-        ImGui::BulletText("GLFW (Windowing, Context & Input)");
+        ImGui::Text("Integrated Core Vendors:");
+        ImGui::BulletText("GLFW 3.4 (Windowing, Context & Events)");
         ImGui::BulletText("GLAD (OpenGL 4.6 Core Loader)");
         ImGui::BulletText("Dear ImGui (Docking & Multi-Viewports)");
-        ImGui::BulletText("GLM (Vector, Matrix, Quaternion Math)");
-        ImGui::BulletText("EnTT (Entity Component System)");
-        ImGui::BulletText("Assimp (3D Model Importer)");
+        ImGui::BulletText("GLM 1.0.1 (Vector & Matrix Math)");
         ImGui::BulletText("stb_image (Texture & Image Loader)");
-        ImGui::BulletText("spdlog (High-Performance Logging)");
+        ImGui::BulletText("spdlog 1.14.1 (Fast Logging)");
 
         ImGui::End();
 
@@ -129,7 +116,7 @@ protected:
     }
 
 private:
-    entt::registry m_Registry;
+    std::vector<Object> m_Objects;
     glm::vec4 m_ClearColor{ 0.10f, 0.11f, 0.13f, 1.0f };
     float m_FrameTime = 0.0f;
     float m_FPS = 0.0f;

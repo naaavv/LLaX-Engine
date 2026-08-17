@@ -1,16 +1,16 @@
 # LLaX-Engine
 
-A modern, lightweight 2D/3D Game Engine built in C++20 with OpenGL, GLFW, Dear ImGui, GLM, EnTT, Assimp, and spdlog.
+A modern, lightweight 2D/3D Game Engine built in C++20 with OpenGL, GLFW, Dear ImGui, GLM, stb_image, and spdlog.
 
 ## 🚀 Features
 
 - **Modern C++20 Architecture**: Modular layer system, clean separation of core engine and client sandboxes.
 - **Windowing & Input**: Full GLFW 3.4 integration supporting mouse, keyboard, and resize events.
-- **OpenGL Graphics Pipeline**: Glad loader supporting Modern OpenGL with easy clear & viewport management.
+- **Real-Time Input Polling**: Static `Input::IsKeyPressed()`, `Input::GetMousePosition()` polling anywhere in code.
+- **OpenGL Graphics Pipeline**: Glad loader supporting Modern OpenGL with clear & viewport management.
 - **Dear ImGui Integration**: Built-in docking and multi-viewport support for developer tooling and UI overlays.
-- **Entity Component System (ECS)**: Powered by EnTT for high-performance entity management.
 - **Math Library**: GLM (OpenGL Mathematics) vector, matrix, and quaternion math.
-- **3D Asset Loading**: Assimp integrated for loading 3D models (OBJ, FBX, GLTF, etc.).
+- **Texture Support**: stb_image integrated for fast 2D texture and image file decoding.
 - **Fast Logging**: spdlog colorized logging macros for both Core engine and Client apps.
 
 ---
@@ -23,14 +23,21 @@ LLaX Engine/
 ├── CMakePresets.json           # Visual Studio & Ninja build presets
 ├── README.md
 ├── .gitignore
-├── Assets/                     # Shaders, textures, and 3D models
+├── Assets/                     # Shaders, textures, and assets
 ├── Engine/                     # LLaX Engine Core Library
 │   ├── CMakeLists.txt
+│   ├── vendor/
+│   │   ├── stb_image/          # stb_image.h & stb_image.cpp
+│   │   └── glad/               # GLAD khrplatform.h
 │   └── src/
 │       ├── LLaX.h             # Master Engine include header
 │       ├── Core/
 │       │   ├── Base.h         # Core definitions, macros & smart pointer aliases
 │       │   ├── Log.h / .cpp   # Spdlog wrapper
+│       │   ├── Timestep.h     # Delta time utility
+│       │   ├── KeyCodes.h     # GLFW Key codes
+│       │   ├── MouseButtonCodes.h
+│       │   ├── Input.h / .cpp # Input polling
 │       │   ├── Window.h / .cpp# GLFW Window & event dispatching
 │       │   └── Application.h / .cpp # Main engine loop & layer lifecycle
 │       ├── Events/
@@ -45,7 +52,7 @@ LLaX Engine/
 └── Sandbox/                    # Client Application Demo
     ├── CMakeLists.txt
     └── src/
-        └── SandboxApp.cpp      # Interactive demo with EnTT, ImGui & Controls
+        └── SandboxApp.cpp      # Interactive demo with ImGui, WASD & Controls
 ```
 
 ---
@@ -58,8 +65,7 @@ LLaX Engine/
 | **GLAD** | 4.6 Core | Modern OpenGL function loader |
 | **GLM** | 1.0.1 | Header-only mathematics library |
 | **Dear ImGui** | Docking | Immediate mode graphical user interface |
-| **EnTT** | 3.13.2 | Fast header-only Entity Component System (ECS) |
-| **Assimp** | 5.4.3 | Open Asset Import Library for 3D model formats |
+| **stb_image** | Latest | Fast 2D texture & image file decoder |
 | **spdlog** | 1.14.1 | Fast C++ logging library |
 
 ---
@@ -68,22 +74,20 @@ LLaX Engine/
 
 ### Prerequisites
 - **CMake** (v3.20 or newer)
-- **C++20 Compiler** (MSVC 2019/2022, GCC 11+, or Clang 13+)
-- **Git** (for FetchContent dependency downloads)
+- **C++20 Compiler** (MSVC 2019/2022/2026, GCC 11+, or Clang 13+)
 
 ### Option 1: Visual Studio
-1. Open the folder `LLaX Engine` in Visual Studio (Open Folder / CMake Project).
-2. Visual Studio will automatically detect `CMakePresets.json` and configure dependencies.
-3. Select `Sandbox.exe` as the startup item and press **F5** to build and run.
+1. Open the folder `LLaX Engine` in Visual Studio.
+2. Select `Sandbox.exe` as the startup item and press **F5** to build and run.
 
 ### Option 2: Command Line (CMake)
 ```bash
-# Configure and download dependencies
+# Configure dependencies
 cmake -B build -DCMAKE_BUILD_TYPE=Debug
 
-# Build the Engine and Sandbox executable
+# Build
 cmake --build build --config Debug
 
-# Run the Sandbox demo
+# Run
 ./build/bin/Sandbox
 ```

@@ -19,8 +19,6 @@ target_link_libraries(LLaXEngine PUBLIC
     glad
     glm::glm
     imgui_lib
-    EnTT::EnTT
-    assimp::assimp
     spdlog::spdlog
 )
 
