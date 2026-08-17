@@ -1,11 +1,3 @@
-Title: Live Content
-
-Description: Fetched live
-
-Source: https://raw.githubusercontent.com/nothings/stb/master/stb_image.h
-
----
-
 /* stb_image - v2.30 - public domain image loader - http://nothings.org/stb
                                   no warranty implied; use at your own risk
 
