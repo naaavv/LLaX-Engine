@@ -9,6 +9,7 @@
 namespace LLaX
 {
     ImGuiLayer::ImGuiLayer()
+        : Layer("ImGuiLayer")
     {
     }
 

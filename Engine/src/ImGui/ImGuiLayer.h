@@ -1,22 +1,21 @@
 #pragma once
 
-#include "Core/Base.h"
-#include "Events/Event.h"
+#include "Core/Layer.h"
 #include "Events/ApplicationEvent.h"
 #include "Events/KeyEvent.h"
 #include "Events/MouseEvent.h"
 
 namespace LLaX
 {
-    class ImGuiLayer
+    class ImGuiLayer : public Layer
     {
     public:
         ImGuiLayer();
-        ~ImGuiLayer();
+        ~ImGuiLayer() override;
 
-        void OnAttach();
-        void OnDetach();
-        void OnEvent(Event& event);
+        void OnAttach() override;
+        void OnDetach() override;
+        void OnEvent(Event& event) override;
 
         void Begin();
         void End();

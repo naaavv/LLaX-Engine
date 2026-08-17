@@ -2,6 +2,8 @@
 
 #include "Core/Base.h"
 #include "Core/Window.h"
+#include "Core/LayerStack.h"
+#include "Core/Timestep.h"
 #include "Events/Event.h"
 #include "Events/ApplicationEvent.h"
 #include "ImGui/ImGuiLayer.h"
@@ -17,14 +19,14 @@ namespace LLaX
         void Run();
         void OnEvent(Event& e);
 
+        void PushLayer(Layer* layer);
+        void PushOverlay(Layer* overlay);
+
         void Close();
 
         inline Window& GetWindow() { return *m_Window; }
+        inline ImGuiLayer* GetImGuiLayer() { return m_ImGuiLayer; }
         inline static Application& Get() { return *s_Instance; }
-
-    protected:
-        virtual void OnUpdate(float ts) {}
-        virtual void OnImGuiRender() {}
 
     private:
         bool OnWindowClose(WindowCloseEvent& e);
@@ -32,9 +34,11 @@ namespace LLaX
 
     private:
         Scope<Window> m_Window;
-        Scope<ImGuiLayer> m_ImGuiLayer;
+        ImGuiLayer* m_ImGuiLayer;
+        LayerStack m_LayerStack;
         bool m_Running = true;
         bool m_Minimized = false;
+        float m_LastFrameTime = 0.0f;
 
         static Application* s_Instance;
     };

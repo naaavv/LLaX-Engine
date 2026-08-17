@@ -16,8 +16,8 @@ Current Version: v0.1.0 (Core Window, Input, ImGui, GLAD, GLFW, GLM, spdlog)
 [x] 5. Real-time Input Polling interface (Input::IsKeyPressed, Input::GetMousePosition)
 [x] 6. Timestep class for frame-rate independent updates
 [x] 7. Dear ImGui layer with Docking & Multi-Viewport support
-[ ] 8. Layer & LayerStack system (PushLayer, PushOverlay, OnAttach, OnDetach, OnUpdate)
-[ ] 9. Assertion & debugging macros (LLAX_ASSERT, LLAX_CORE_ASSERT with break support)
+[x] 8. Layer & LayerStack system (PushLayer, PushOverlay, OnAttach, OnDetach, OnUpdate)
+[x] 9. Assertion & debugging macros (LLAX_ASSERT, LLAX_CORE_ASSERT with break support)
 
 --------------------------------------------------------------------------------
 [ PHASE 2: 2D/3D RENDERING PIPELINE ]

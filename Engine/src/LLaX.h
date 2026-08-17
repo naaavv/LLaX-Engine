@@ -9,6 +9,8 @@
 #include "Core/KeyCodes.h"
 #include "Core/MouseButtonCodes.h"
 #include "Core/Timestep.h"
+#include "Core/Layer.h"
+#include "Core/LayerStack.h"
 
 // Events System
 #include "Events/Event.h"

@@ -10,6 +10,7 @@ namespace LLaX
 
     Application::Application(const std::string& name)
     {
+        LLAX_CORE_ASSERT(!s_Instance, "Application already exists!");
         s_Instance = this;
 
         Log::Init();
@@ -20,15 +21,24 @@ namespace LLaX
 
         Renderer::Init();
 
-        m_ImGuiLayer = CreateScope<ImGuiLayer>();
-        m_ImGuiLayer->OnAttach();
+        m_ImGuiLayer = new ImGuiLayer();
+        PushOverlay(m_ImGuiLayer);
     }
 
     Application::~Application()
     {
-        m_ImGuiLayer->OnDetach();
         Renderer::Shutdown();
         LLAX_CORE_INFO("LLaX Engine terminated.");
+    }
+
+    void Application::PushLayer(Layer* layer)
+    {
+        m_LayerStack.PushLayer(layer);
+    }
+
+    void Application::PushOverlay(Layer* overlay)
+    {
+        m_LayerStack.PushOverlay(overlay);
     }
 
     void Application::Close()
@@ -42,28 +52,33 @@ namespace LLaX
         dispatcher.Dispatch<WindowCloseEvent>(LLAX_BIND_EVENT_FN(Application::OnWindowClose));
         dispatcher.Dispatch<WindowResizeEvent>(LLAX_BIND_EVENT_FN(Application::OnWindowResize));
 
-        m_ImGuiLayer->OnEvent(e);
+        for (auto it = m_LayerStack.rbegin(); it != m_LayerStack.rend(); ++it)
+        {
+            if (e.Handled)
+                break;
+            (*it)->OnEvent(e);
+        }
     }
 
     void Application::Run()
     {
-        float lastFrameTime = (float)glfwGetTime();
-
         while (m_Running)
         {
             float time = (float)glfwGetTime();
-            float timestep = time - lastFrameTime;
-            lastFrameTime = time;
+            Timestep timestep = time - m_LastFrameTime;
+            m_LastFrameTime = time;
 
             if (!m_Minimized)
             {
                 Renderer::SetClearColor({ 0.12f, 0.12f, 0.14f, 1.0f });
                 Renderer::Clear();
 
-                OnUpdate(timestep);
+                for (Layer* layer : m_LayerStack)
+                    layer->OnUpdate(timestep);
 
                 m_ImGuiLayer->Begin();
-                OnImGuiRender();
+                for (Layer* layer : m_LayerStack)
+                    layer->OnImGuiRender();
                 m_ImGuiLayer->End();
             }
 

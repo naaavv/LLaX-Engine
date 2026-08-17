@@ -7,37 +7,43 @@ struct Transform
     glm::vec3 Scale{ 1.0f };
 };
 
-struct Object
+struct GameObject
 {
     std::string Name;
     Transform Transform;
 };
 
-class SandboxApp : public LLaX::Application
+class ExampleLayer : public LLaX::Layer
 {
 public:
-    SandboxApp()
-        : LLaX::Application("LLaX Engine - Sandbox")
+    ExampleLayer()
+        : Layer("ExampleLayer")
     {
-        LLAX_INFO("Sandbox Application Initialized!");
+    }
+
+    void OnAttach() override
+    {
+        LLAX_INFO("ExampleLayer attached to LayerStack!");
+
+        // Test Assertion macro (will succeed)
+        LLAX_ASSERT(true, "Assertion test passed!");
 
         m_Objects.push_back({ "Main Camera", { glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f), glm::vec3(1.0f) } });
         m_Objects.push_back({ "Player Quad", { glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f), glm::vec3(1.0f) } });
         m_Objects.push_back({ "Directional Light", { glm::vec3(2.0f, 4.0f, 2.0f), glm::vec3(0.0f), glm::vec3(1.0f) } });
     }
 
-    ~SandboxApp() override
+    void OnDetach() override
     {
-        LLAX_INFO("Sandbox Application Exiting!");
+        LLAX_INFO("ExampleLayer detached!");
     }
 
-protected:
-    void OnUpdate(float ts) override
+    void OnUpdate(LLaX::Timestep ts) override
     {
-        m_FrameTime = ts;
-        m_FPS = ts > 0.0f ? 1.0f / ts : 0.0f;
+        m_FrameTime = ts.GetSeconds();
+        m_FPS = ts > 0.0f ? 1.0f / ts.GetSeconds() : 0.0f;
 
-        // Move Player Quad with WASD keys
+        // Input Polling: Move Player with WASD keys
         if (m_Objects.size() > 1)
         {
             auto& playerTransform = m_Objects[1].Transform;
@@ -56,9 +62,9 @@ protected:
 
     void OnImGuiRender() override
     {
-        ImGui::Begin("LLaX Engine Control Panel");
+        ImGui::Begin("LLaX Engine - Layer & Controls");
 
-        ImGui::TextColored(ImVec4(0.2f, 0.8f, 1.0f, 1.0f), "LLaX Engine v0.1.0");
+        ImGui::TextColored(ImVec4(0.2f, 0.8f, 1.0f, 1.0f), "LLaX Engine v0.1.0 (LayerStack Enabled)");
         ImGui::Separator();
 
         ImGui::Text("Performance:");
@@ -67,10 +73,10 @@ protected:
 
         ImGui::Spacing();
         ImGui::Separator();
-        ImGui::Text("Input Polling:");
+        ImGui::Text("Real-Time Input Polling:");
         glm::vec2 mousePos = LLaX::Input::GetMousePosition();
-        ImGui::Text("  Mouse: (%.1f, %.1f)", mousePos.x, mousePos.y);
-        ImGui::Text("  Press [W/A/S/D] to move Player Quad");
+        ImGui::Text("  Mouse Pos: (%.1f, %.1f)", mousePos.x, mousePos.y);
+        ImGui::Text("  Controls: Hold [W / A / S / D] to move Player Quad");
 
         ImGui::Spacing();
         ImGui::Separator();
@@ -79,7 +85,7 @@ protected:
 
         ImGui::Spacing();
         ImGui::Separator();
-        ImGui::Text("Scene Hierarchy (Objects):");
+        ImGui::Text("Scene Hierarchy (Layer Objects):");
 
         for (size_t i = 0; i < m_Objects.size(); ++i)
         {
@@ -93,21 +99,19 @@ protected:
             }
         }
 
-        if (ImGui::Button("+ Add Object"))
+        if (ImGui::Button("+ Add GameObject"))
         {
-            static int objectCount = 1;
-            m_Objects.push_back({ "Object #" + std::to_string(objectCount++), {} });
+            static int count = 1;
+            m_Objects.push_back({ "GameObject #" + std::to_string(count++), {} });
         }
 
         ImGui::Spacing();
         ImGui::Separator();
-        ImGui::Text("Integrated Core Vendors:");
-        ImGui::BulletText("GLFW 3.4 (Windowing, Context & Events)");
-        ImGui::BulletText("GLAD (OpenGL 4.6 Core Loader)");
-        ImGui::BulletText("Dear ImGui (Docking & Multi-Viewports)");
-        ImGui::BulletText("GLM 1.0.1 (Vector & Matrix Math)");
-        ImGui::BulletText("stb_image (Texture & Image Loader)");
-        ImGui::BulletText("spdlog 1.14.1 (Fast Logging)");
+        ImGui::Text("Active Engine Features:");
+        ImGui::BulletText("Layer & LayerStack System [ACTIVE]");
+        ImGui::BulletText("Assertion & Debugging Macros (LLAX_ASSERT) [ACTIVE]");
+        ImGui::BulletText("Real-Time Input Polling [ACTIVE]");
+        ImGui::BulletText("Dear ImGui Docking Layer [ACTIVE]");
 
         ImGui::End();
 
@@ -115,12 +119,31 @@ protected:
             ImGui::ShowDemoWindow(&m_ShowImGuiDemo);
     }
 
+    void OnEvent(LLaX::Event& event) override
+    {
+        // Handle layer-specific events here if needed
+    }
+
 private:
-    std::vector<Object> m_Objects;
+    std::vector<GameObject> m_Objects;
     glm::vec4 m_ClearColor{ 0.10f, 0.11f, 0.13f, 1.0f };
     float m_FrameTime = 0.0f;
     float m_FPS = 0.0f;
     bool m_ShowImGuiDemo = false;
+};
+
+class SandboxApp : public LLaX::Application
+{
+public:
+    SandboxApp()
+        : LLaX::Application("LLaX Engine - LayerStack Sandbox")
+    {
+        PushLayer(new ExampleLayer());
+    }
+
+    ~SandboxApp() override
+    {
+    }
 };
 
 int main(int argc, char** argv)
