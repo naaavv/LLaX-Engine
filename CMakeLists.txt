@@ -36,11 +36,11 @@ FetchContent_Declare(
     GIT_SHALLOW TRUE
 )
 
-# 2. GLAD (OpenGL loader)
+# 2. GLAD (OpenGL loader via libigl-glad)
 message(STATUS "[LLaX] Configuring GLAD...")
 FetchContent_Declare(
     glad
-    GIT_REPOSITORY https://github.com/libigl/glad.git
+    GIT_REPOSITORY https://github.com/libigl/libigl-glad.git
     GIT_TAG master
     GIT_SHALLOW TRUE
 )
@@ -57,16 +57,7 @@ FetchContent_Declare(
     GIT_SHALLOW TRUE
 )
 
-# 4. ImGui (Docking branch)
-message(STATUS "[LLaX] Configuring Dear ImGui...")
-FetchContent_Declare(
-    imgui
-    GIT_REPOSITORY https://github.com/ocornut/imgui.git
-    GIT_TAG docking
-    GIT_SHALLOW TRUE
-)
-
-# 5. EnTT (ECS)
+# 4. EnTT (ECS)
 message(STATUS "[LLaX] Configuring EnTT...")
 set(ENTT_BUILD_TESTING OFF CACHE BOOL "" FORCE)
 set(ENTT_BUILD_DOCS OFF CACHE BOOL "" FORCE)
@@ -77,7 +68,7 @@ FetchContent_Declare(
     GIT_SHALLOW TRUE
 )
 
-# 6. Assimp (Open Asset Import Library)
+# 5. Assimp (Open Asset Import Library)
 message(STATUS "[LLaX] Configuring Assimp...")
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
@@ -92,7 +83,7 @@ FetchContent_Declare(
     GIT_SHALLOW TRUE
 )
 
-# 7. spdlog (Fast C++ logging)
+# 6. spdlog (Fast C++ logging)
 message(STATUS "[LLaX] Configuring spdlog...")
 set(SPDLOG_BUILD_EXAMPLE OFF CACHE BOOL "" FORCE)
 set(SPDLOG_BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -103,8 +94,22 @@ FetchContent_Declare(
     GIT_SHALLOW TRUE
 )
 
-message(STATUS "[LLaX] Fetching and making dependencies available...")
-FetchContent_MakeAvailable(glfw glad glm imgui entt assimp spdlog)
+# 7. Dear ImGui (Docking branch - No CMakeLists in repo, populate manually)
+message(STATUS "[LLaX] Configuring Dear ImGui...")
+FetchContent_Declare(
+    imgui
+    GIT_REPOSITORY https://github.com/ocornut/imgui.git
+    GIT_TAG docking
+    GIT_SHALLOW TRUE
+)
+
+message(STATUS "[LLaX] Fetching CMake dependencies...")
+FetchContent_MakeAvailable(glfw glad glm entt assimp spdlog)
+
+FetchContent_GetProperties(imgui)
+if(NOT imgui_POPULATED)
+    FetchContent_Populate(imgui)
+endif()
 
 # Dear ImGui library target
 add_library(imgui_lib STATIC
@@ -119,7 +124,6 @@ add_library(imgui_lib STATIC
 target_include_directories(imgui_lib PUBLIC
     ${imgui_SOURCE_DIR}
     ${imgui_SOURCE_DIR}/backends
-    ${glfw_SOURCE_DIR}/include
 )
 target_link_libraries(imgui_lib PUBLIC glfw glad)
 
