@@ -1,0 +1,39 @@
+# Visual Studio / VS Code
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# CMake build directories & presets
+build/
+out/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.ninja
+.ninja_deps
+.ninja_log
+
+# FetchContent download cache
+_deps/
+submodules/
+
+# Compiled Binaries & Libraries
+bin/
+bin-int/
+*.exe
+*.dll
+*.so
+*.dylib
+*.lib
+*.a
+*.pdb
+*.ilk
+*.exp
+
+# OS generated
+.DS_Store
+Thumbs.db
