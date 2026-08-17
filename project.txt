@@ -1,0 +1,110 @@
+================================================================================
+                           LLaX ENGINE - PROJECT ROADMAP & TODO
+================================================================================
+
+Project: LLaX Engine
+Description: A modern, modular 2D/3D C++20 Game Engine & Editor
+Current Version: v0.1.0 (Core Window, Input, ImGui, GLAD, GLFW, GLM, spdlog)
+
+--------------------------------------------------------------------------------
+[ PHASE 1: CORE ARCHITECTURE & FOUNDATION ]
+--------------------------------------------------------------------------------
+[x] 1. CMake Build System with automated vendor fetching (GLFW, ImGui, GLM, spdlog)
+[x] 2. GLFW Windowing abstraction with event callback bridge
+[x] 3. Core Logging system with spdlog (LLAX_CORE_INFO, LLAX_INFO, etc.)
+[x] 4. Event System (Window resize/close, Keyboard, Mouse events)
+[x] 5. Real-time Input Polling interface (Input::IsKeyPressed, Input::GetMousePosition)
+[x] 6. Timestep class for frame-rate independent updates
+[x] 7. Dear ImGui layer with Docking & Multi-Viewport support
+[ ] 8. Layer & LayerStack system (PushLayer, PushOverlay, OnAttach, OnDetach, OnUpdate)
+[ ] 9. Assertion & debugging macros (LLAX_ASSERT, LLAX_CORE_ASSERT with break support)
+
+--------------------------------------------------------------------------------
+[ PHASE 2: 2D/3D RENDERING PIPELINE ]
+--------------------------------------------------------------------------------
+[ ] 1. Graphics Context abstraction (OpenGLContext)
+[ ] 2. Buffer Abstraction:
+       - VertexBuffer (dynamic & static data uploads)
+       - IndexBuffer / ElementBuffer
+       - BufferLayout & BufferElement (Float, Float2, Float3, Float4, Mat4, Int, Bool)
+       - VertexArray abstraction
+[ ] 3. Shader System:
+       - Shader class compiling Vertex & Fragment GLSL shaders from file
+       - Uniform upload helpers (SetInt, SetFloat, SetFloat3, SetMat4, etc.)
+       - ShaderLibrary for caching and managing loaded shaders
+[ ] 4. Texture System:
+       - Texture2D class using stb_image
+       - Texture filtering options (Linear, Nearest) & wrapping (Repeat, Clamp)
+       - SubTexture2D / SpriteSheet texture atlas slicing
+[ ] 5. Camera System:
+       - OrthographicCamera & OrthographicCameraController (pan, zoom, aspect ratio)
+       - PerspectiveCamera & 3D Editor Camera (orbit, pan, zoom, free fly)
+[ ] 6. 2D Batch Renderer (High-Performance Quad Renderer):
+       - Batching up to 10,000+ quads in a single draw call
+       - DrawQuad(position, size, color)
+       - DrawQuad(position, size, texture, tilingFactor, tintColor)
+       - DrawRotatedQuad(position, size, rotation, ...)
+       - Multi-texture batching (binding up to 16/32 texture slots per draw call)
+       - Renderer statistics (Draw call counter, Quad counter)
+[ ] 7. Framebuffer System:
+       - Framebuffer class with color and depth/stencil attachments
+       - Off-screen rendering to allow rendering game output into an ImGui Viewport panel
+       - Viewport resizing & aspect ratio correction
+
+--------------------------------------------------------------------------------
+[ PHASE 3: GAME ENGINE EDITOR (LLaX Studio) ]
+--------------------------------------------------------------------------------
+[ ] 1. Editor Viewport Panel:
+       - ImGui image widget rendering Framebuffer texture
+       - Viewport bounds, gizmo manipulation & mouse picking
+[ ] 2. Scene Hierarchy Panel:
+       - List all active GameObjects / Entities in the current scene
+       - Right-click context menus (Create empty, delete, duplicate)
+[ ] 3. Properties / Inspector Panel:
+       - Edit Transform (Position, Rotation, Scale) with custom drag controls
+       - Edit Sprite / Color / Texture properties live
+       - Add / Remove components dynamically
+[ ] 4. Content Browser Panel:
+       - Visual file explorer for Assets folder (textures, shaders, scenes, models)
+       - Drag and drop assets directly into Inspector / Viewport
+[ ] 5. Console / Log Panel:
+       - Live output log messages inside an ImGui editor dock window
+       - Filter by Info, Warning, Error
+[ ] 6. Play / Pause / Step Runtime toolbar controls
+
+--------------------------------------------------------------------------------
+[ PHASE 4: SCENE & ENTITY SYSTEM (ECS) ]
+--------------------------------------------------------------------------------
+[ ] 1. Scene graph & Scene lifecycle:
+       - Scene::Create(), Scene::OnUpdateRuntime(), Scene::OnUpdateEditor()
+[ ] 2. Entity & Component Architecture:
+       - TagComponent (Name / Identifier)
+       - TransformComponent (Position, Rotation, Scale)
+       - SpriteRendererComponent (Color, Texture, Tiling)
+       - CameraComponent (Primary camera, Projection type, FOV/Size)
+       - NativeScriptComponent (Bind custom C++ gameplay logic)
+[ ] 3. Scene Serialization & Persistence:
+       - Save scenes to .llax file format (YAML / JSON)
+       - Load and deserialize saved scenes
+
+--------------------------------------------------------------------------------
+[ PHASE 5: PHYSICS, AUDIO & EXPANSIONS ]
+--------------------------------------------------------------------------------
+[ ] 1. 2D Physics Engine integration (Box2D):
+       - Rigidbody2DComponent (Static, Dynamic, Kinematic)
+       - BoxCollider2DComponent & CircleCollider2DComponent
+       - Physics simulation update step in Scene runtime
+[ ] 2. Audio System integration (miniaudio / SoLoud):
+       - Sound effect playback (.wav, .mp3, .ogg)
+       - Background music streaming & 2D/3D spatial audio
+[ ] 3. Particle System (2D Particle Emitter component):
+       - Velocity, lifetime, color transitions, size over time
+
+================================================================================
+                           RECOMMENDED IMMEDIATE NEXT STEP
+================================================================================
+👉 Next step to build:
+   1. Implement the 'LayerStack' & 'Layer' system so Sandbox can push custom layers.
+   2. Create 'Shader' and 'VertexArray' / 'Buffer' classes to draw your first colored triangle/quad!
+   3. Build the 'OrthographicCamera' for 2D pan and zoom.
+================================================================================
