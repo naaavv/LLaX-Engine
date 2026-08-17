@@ -3,6 +3,7 @@
 #include "Core/Base.h"
 #include <string>
 #include <functional>
+#include <iostream>
 
 namespace LLaX
 {
