@@ -1,6 +1,5 @@
-file(GLOB_RECURSE SANDBOX_SOURCES 
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
+set(SANDBOX_SOURCES
+    src/SandboxApp.cpp
 )
 
 add_executable(Sandbox ${SANDBOX_SOURCES})
