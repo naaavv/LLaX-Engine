@@ -18,12 +18,12 @@ public:
     SandboxApp()
         : LLaX::Application("LLaX Engine - Sandbox")
     {
-        LLAX_INFO("Sandbox Application Started!");
+        LLAX_INFO("Sandbox Application Initialized!");
 
         // Demo: Setup EnTT Entity Component System registry
-        auto entity = m_Registry.create();
-        m_Registry.emplace<TagComponent>(entity, "Main Camera");
-        m_Registry.emplace<TransformComponent>(entity, glm::vec3(0.0f, 0.0f, 5.0f));
+        auto camera = m_Registry.create();
+        m_Registry.emplace<TagComponent>(camera, "Main Camera");
+        m_Registry.emplace<TransformComponent>(camera, glm::vec3(0.0f, 0.0f, 5.0f));
 
         auto light = m_Registry.create();
         m_Registry.emplace<TagComponent>(light, "Directional Light");
@@ -41,6 +41,20 @@ protected:
         m_FrameTime = ts;
         m_FPS = ts > 0.0f ? 1.0f / ts : 0.0f;
 
+        // Input Polling Demo: Move first entity with WASD
+        auto view = m_Registry.view<TransformComponent>();
+        if (!view.empty())
+        {
+            auto entity = view.front();
+            auto& transform = view.get<TransformComponent>(entity);
+            float speed = 2.5f * ts;
+
+            if (LLaX::Input::IsKeyPressed(LLaX::Key::W)) transform.Position.y += speed;
+            if (LLaX::Input::IsKeyPressed(LLaX::Key::S)) transform.Position.y -= speed;
+            if (LLaX::Input::IsKeyPressed(LLaX::Key::A)) transform.Position.x -= speed;
+            if (LLaX::Input::IsKeyPressed(LLaX::Key::D)) transform.Position.x += speed;
+        }
+
         // Apply background clear color
         LLaX::Renderer::SetClearColor(m_ClearColor);
         LLaX::Renderer::Clear();
@@ -48,7 +62,6 @@ protected:
 
     void OnImGuiRender() override
     {
-        // Demonstration ImGui Panel
         ImGui::Begin("LLaX Engine Control Panel");
 
         ImGui::TextColored(ImVec4(0.2f, 0.8f, 1.0f, 1.0f), "LLaX Engine v0.1.0");
@@ -60,12 +73,19 @@ protected:
 
         ImGui::Spacing();
         ImGui::Separator();
+        ImGui::Text("Input Polling:");
+        glm::vec2 mousePos = LLaX::Input::GetMousePosition();
+        ImGui::Text("  Mouse: (%.1f, %.1f)", mousePos.x, mousePos.y);
+        ImGui::Text("  Press [W/A/S/D] to move selected entity");
+
+        ImGui::Spacing();
+        ImGui::Separator();
         ImGui::Text("Renderer Settings:");
         ImGui::ColorEdit4("Clear Color", &m_ClearColor.r);
 
         ImGui::Spacing();
         ImGui::Separator();
-        ImGui::Text("EnTT Scene Hierarchy (Entities):");
+        ImGui::Text("EnTT Scene Hierarchy:");
         
         auto view = m_Registry.view<TagComponent, TransformComponent>();
         for (auto entity : view)
@@ -75,14 +95,14 @@ protected:
 
             if (ImGui::TreeNode(tag.Tag.c_str()))
             {
-                ImGui::DragFloat3("Position", &transform.Position.x, 0.1f);
+                ImGui::DragFloat3("Position", &transform.Position.x, 0.05f);
                 ImGui::DragFloat3("Rotation", &transform.Rotation.x, 0.5f);
-                ImGui::DragFloat3("Scale", &transform.Scale.x, 0.1f);
+                ImGui::DragFloat3("Scale", &transform.Scale.x, 0.05f);
                 ImGui::TreePop();
             }
         }
 
-        if (ImGui::Button("Spawn Demo Entity"))
+        if (ImGui::Button("+ Add Entity"))
         {
             auto e = m_Registry.create();
             static int entityCount = 1;
@@ -92,18 +112,18 @@ protected:
 
         ImGui::Spacing();
         ImGui::Separator();
-        ImGui::Text("Integrated Libraries:");
-        ImGui::BulletText("GLFW 3.4 (Windowing & Events)");
-        ImGui::BulletText("GLAD (OpenGL 4.6 Loader)");
-        ImGui::BulletText("Dear ImGui (Docking Enabled)");
-        ImGui::BulletText("GLM 1.0.1 (Mathematics)");
-        ImGui::BulletText("EnTT 3.13.2 (Entity Component System)");
-        ImGui::BulletText("Assimp 5.4.3 (3D Asset Importer)");
-        ImGui::BulletText("spdlog 1.14.1 (Fast Logging)");
+        ImGui::Text("Integrated Vendor Libraries:");
+        ImGui::BulletText("GLFW (Windowing, Context & Input)");
+        ImGui::BulletText("GLAD (OpenGL 4.6 Core Loader)");
+        ImGui::BulletText("Dear ImGui (Docking & Multi-Viewports)");
+        ImGui::BulletText("GLM (Vector, Matrix, Quaternion Math)");
+        ImGui::BulletText("EnTT (Entity Component System)");
+        ImGui::BulletText("Assimp (3D Model Importer)");
+        ImGui::BulletText("stb_image (Texture & Image Loader)");
+        ImGui::BulletText("spdlog (High-Performance Logging)");
 
         ImGui::End();
 
-        // Optional: show ImGui demo window
         if (m_ShowImGuiDemo)
             ImGui::ShowDemoWindow(&m_ShowImGuiDemo);
     }
