@@ -1,6 +1,7 @@
 set(ENGINE_SOURCES
     # Core
     src/Core/Base.h
+    src/Core/Assert.h
     src/Core/Log.h
     src/Core/Log.cpp
     src/Core/Timestep.h

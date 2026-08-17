@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Base.h"
+#include "Core/Assert.h"
 #include "Core/Window.h"
 #include "Core/LayerStack.h"
 #include "Core/Timestep.h"

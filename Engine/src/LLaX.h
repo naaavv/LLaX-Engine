@@ -2,6 +2,7 @@
 
 // Core Engine Systems
 #include "Core/Base.h"
+#include "Core/Assert.h"
 #include "Core/Application.h"
 #include "Core/Log.h"
 #include "Core/Window.h"
