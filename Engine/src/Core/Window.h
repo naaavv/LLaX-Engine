@@ -2,6 +2,7 @@
 
 #include "Base.h"
 #include "Events/Event.h"
+#include "Renderer/GraphicsContext.h"
 #include <string>
 #include <functional>
 
@@ -48,6 +49,7 @@ namespace LLaX
 
     private:
         GLFWwindow* m_Window = nullptr;
+        Scope<GraphicsContext> m_Context;
 
         struct WindowData
         {

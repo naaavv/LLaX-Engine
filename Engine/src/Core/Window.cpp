@@ -3,8 +3,8 @@
 #include "Events/ApplicationEvent.h"
 #include "Events/KeyEvent.h"
 #include "Events/MouseEvent.h"
+#include "Platform/OpenGL/OpenGLContext.h"
 
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 namespace LLaX
@@ -58,20 +58,12 @@ namespace LLaX
         }
         ++s_GLFWWindowCount;
 
-        glfwMakeContextCurrent(m_Window);
-
-        int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-        if (!status)
-        {
-            LLAX_CORE_CRITICAL("Failed to initialize Glad OpenGL loader!");
-        }
-        else
-        {
-            LLAX_CORE_INFO("OpenGL Info:");
-            LLAX_CORE_INFO("  Vendor:   {0}", (const char*)glGetString(GL_VENDOR));
-            LLAX_CORE_INFO("  Renderer: {0}", (const char*)glGetString(GL_RENDERER));
-            LLAX_CORE_INFO("  Version:  {0}", (const char*)glGetString(GL_VERSION));
-        }
+        // Create and initialize the platform graphics context.
+        // Doing this through the abstraction means Window.cpp stays
+        // backend-agnostic — swap to VulkanContext here in the future
+        // without touching anything else.
+        m_Context = CreateScope<OpenGLContext>(m_Window);
+        m_Context->Init();
 
         glfwSetWindowUserPointer(m_Window, &m_Data);
         SetVSync(true);
@@ -179,7 +171,7 @@ namespace LLaX
     void Window::OnUpdate()
     {
         glfwPollEvents();
-        glfwSwapBuffers(m_Window);
+        m_Context->SwapBuffers();
     }
 
     void Window::SetVSync(bool enabled)

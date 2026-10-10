@@ -28,9 +28,15 @@ set(ENGINE_SOURCES
     src/ImGui/ImGuiLayer.h
     src/ImGui/ImGuiLayer.cpp
 
+    #platform:
+        #OpenGl
+        src/Platform/OpenGL/OpenGLContext.cpp
+        src/Platform/OpenGL/OpenGLContext.h
+
     # Renderer
     src/Renderer/Renderer.h
     src/Renderer/Renderer.cpp
+    src/Renderer/GraphicsContext.h
 
     # Master Header
     src/LLaX.h
