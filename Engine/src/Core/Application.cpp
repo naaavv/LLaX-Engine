@@ -29,6 +29,7 @@ namespace LLaX
     {
         Renderer::Shutdown();
         LLAX_CORE_INFO("LLaX Engine terminated.");
+        Log::Shutdown();
     }
 
     void Application::PushLayer(Layer* layer)
