@@ -2,7 +2,11 @@
 #include "Core/Log.h"
 #include "Core/Assert.h"
 
+// glad.h MUST come before glfw3.h.
+// GLFW would otherwise include the legacy <GL/gl.h> first,
+// which conflicts with glad's own OpenGL declarations.
 #include <glad/glad.h>
+#include <GLFW/glfw3.h>
 
 namespace LLaX
 {

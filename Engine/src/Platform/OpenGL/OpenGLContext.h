@@ -1,7 +1,11 @@
 #pragma once
 
 #include "Renderer/GraphicsContext.h"
-#include <GLFW/glfw3.h>
+
+// Forward-declare GLFWwindow so the header stays free of GLFW/GL includes.
+// glad.h MUST be included before glfw3.h — keeping the include in the .cpp
+// ensures that order is always correct.
+struct GLFWwindow;
 
 namespace LLaX
 {
