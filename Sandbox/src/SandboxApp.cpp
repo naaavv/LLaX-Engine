@@ -11,7 +11,7 @@ struct GameObject
 {
     std::string Name;
     Transform Transform;
-};
+};  
 
 class ExampleLayer : public LLaX::Layer
 {
@@ -73,19 +73,9 @@ public:
 
         ImGui::Spacing();
         ImGui::Separator();
-        ImGui::Text("Real-Time Input Polling:");
-        glm::vec2 mousePos = LLaX::Input::GetMousePosition();
-        ImGui::Text("  Mouse Pos: (%.1f, %.1f)", mousePos.x, mousePos.y);
-        ImGui::Text("  Controls: Hold [W / A / S / D] to move Player Quad");
-
-        ImGui::Spacing();
-        ImGui::Separator();
         ImGui::Text("Renderer Settings:");
         ImGui::ColorEdit4("Clear Color", &m_ClearColor.r);
 
-        ImGui::Spacing();
-        ImGui::Separator();
-        ImGui::Text("Scene Hierarchy (Layer Objects):");
 
         for (size_t i = 0; i < m_Objects.size(); ++i)
         {
@@ -98,20 +88,6 @@ public:
                 ImGui::TreePop();
             }
         }
-
-        if (ImGui::Button("+ Add GameObject"))
-        {
-            static int count = 1;
-            m_Objects.push_back({ "GameObject #" + std::to_string(count++), {} });
-        }
-
-        ImGui::Spacing();
-        ImGui::Separator();
-        ImGui::Text("Active Engine Features:");
-        ImGui::BulletText("Layer & LayerStack System [ACTIVE]");
-        ImGui::BulletText("Assertion & Debugging Macros (LLAX_ASSERT) [ACTIVE]");
-        ImGui::BulletText("Real-Time Input Polling [ACTIVE]");
-        ImGui::BulletText("Dear ImGui Docking Layer [ACTIVE]");
 
         ImGui::End();
 
@@ -136,7 +112,7 @@ class SandboxApp : public LLaX::Application
 {
 public:
     SandboxApp()
-        : LLaX::Application("LLaX Engine - LayerStack Sandbox")
+        : LLaX::Application("LLaX Engine -  Sandbox")
     {
         PushLayer(new ExampleLayer());
     }

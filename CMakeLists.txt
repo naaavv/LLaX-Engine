@@ -6,7 +6,7 @@ project(LLaX-Engine
 )
 
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD_RSEQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Enable Hot Reload / debug info for MSVC if supported

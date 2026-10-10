@@ -16,8 +16,8 @@ namespace LLaX
         unsigned int Height;
 
         WindowProps(const std::string& title = "LLaX Engine",
-                    unsigned int width = 1280,
-                    unsigned int height = 720)
+                    unsigned int width = 800,
+                    unsigned int height = 600)
             : Title(title), Width(width), Height(height)
         {
         }

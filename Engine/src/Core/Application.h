@@ -14,7 +14,7 @@ namespace LLaX
     class Application
     {
     public:
-        Application(const std::string& name = "LLaX Engine App");
+        Application(const std::string& name = "LLaX Engine");
         virtual ~Application();
 
         void Run();
