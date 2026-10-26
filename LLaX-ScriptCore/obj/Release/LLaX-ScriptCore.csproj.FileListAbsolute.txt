@@ -1,0 +1,14 @@
+c:\dev\LLaX Engine\Assets\scripts\bin\LLaX-ScriptCore.deps.json
+c:\dev\LLaX Engine\Assets\scripts\bin\LLaX-ScriptCore.dll
+c:\dev\LLaX Engine\Assets\scripts\bin\LLaX-ScriptCore.pdb
+c:\dev\LLaX Engine\LLaX-ScriptCore\obj\Release\LLaX-ScriptCore.GeneratedMSBuildEditorConfig.editorconfig
+c:\dev\LLaX Engine\LLaX-ScriptCore\obj\Release\LLaX-ScriptCore.AssemblyInfoInputs.cache
+c:\dev\LLaX Engine\LLaX-ScriptCore\obj\Release\LLaX-ScriptCore.AssemblyInfo.cs
+c:\dev\LLaX Engine\LLaX-ScriptCore\obj\Release\LLaX-ScriptCore.csproj.CoreCompileInputs.cache
+c:\dev\LLaX Engine\LLaX-ScriptCore\obj\Release\LLaX-ScriptCore.sourcelink.json
+c:\dev\LLaX Engine\LLaX-ScriptCore\obj\Release\LLaX-ScriptCore.dll
+c:\dev\LLaX Engine\LLaX-ScriptCore\obj\Release\refint\LLaX-ScriptCore.dll
+c:\dev\LLaX Engine\LLaX-ScriptCore\obj\Release\LLaX-ScriptCore.pdb
+c:\dev\LLaX Engine\LLaX-ScriptCore\obj\Release\ref\LLaX-ScriptCore.dll
+c:\dev\LLaX Engine\Assets\scripts\bin\LLaX-ScriptCore.runtimeconfig.json
+c:\dev\LLaX Engine\LLaX-ScriptCore\obj\Release\LLaX-ScriptCore.genruntimeconfig.cache

@@ -343,6 +343,15 @@ namespace LLaX
                 }
             }
 
+            if (!entity.HasComponent<CSharpScriptComponent>())
+            {
+                if (ImGui::MenuItem("C# Script (.NET / Mono)"))
+                {
+                    entity.AddComponent<CSharpScriptComponent>("Sandbox.Player");
+                    ImGui::CloseCurrentPopup();
+                }
+            }
+
             ImGui::EndPopup();
         }
         ImGui::PopItemWidth();
@@ -510,6 +519,32 @@ namespace LLaX
                 ImGui::TextColored(ImVec4(0.25f, 0.88f, 0.45f, 1.0f), "Status: Running");
             else
                 ImGui::TextDisabled("Status: Ready (Inactive in Edit mode)");
+        });
+
+        // ─── C# Script Component ─────────────────────────────────────────────
+        DrawComponent<CSharpScriptComponent>("C# Script (.NET)", entity, [](auto& component) {
+            char buffer[256];
+            memset(buffer, 0, sizeof(buffer));
+            strncpy_s(buffer, component.ClassName.c_str(), sizeof(buffer));
+
+            ImGui::TextColored(ImVec4(0.85f, 0.45f, 0.95f, 1.0f), "C# Managed Class");
+            if (ImGui::InputText("Class Name", buffer, sizeof(buffer)))
+            {
+                component.ClassName = std::string(buffer);
+            }
+
+            ImGui::Spacing();
+            ImGui::TextDisabled("Presets:");
+            ImGui::SameLine();
+            if (ImGui::SmallButton("Sandbox.Player")) component.ClassName = "Sandbox.Player";
+            ImGui::SameLine();
+            if (ImGui::SmallButton("Sandbox.Rotator")) component.ClassName = "Sandbox.Rotator";
+
+            ImGui::Spacing();
+            if (ScriptEngine::IsInitialized())
+                ImGui::TextColored(ImVec4(0.25f, 0.88f, 0.45f, 1.0f), "[C# Engine: Active]");
+            else
+                ImGui::TextColored(ImVec4(0.95f, 0.78f, 0.20f, 1.0f), "[C# Engine: Inactive]");
         });
     }
 }

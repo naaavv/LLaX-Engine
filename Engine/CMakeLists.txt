@@ -45,6 +45,10 @@ set(ENGINE_SOURCES
     src/Audio/AudioSystem.h
     src/Audio/AudioSystem.cpp
 
+    # Scripting (.NET / Mono CoreCLR)
+    src/Scripting/ScriptEngine.h
+    src/Scripting/ScriptEngine.cpp
+
     # Utilities & Platform
     src/Utils/PlatformUtils.h
     src/Platform/Windows/WindowsPlatformUtils.cpp

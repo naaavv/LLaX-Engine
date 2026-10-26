@@ -31,6 +31,9 @@
 // Audio
 #include "Audio/AudioSystem.h"
 
+// Scripting
+#include "Scripting/ScriptEngine.h"
+
 // Utilities
 #include "Utils/PlatformUtils.h"
 

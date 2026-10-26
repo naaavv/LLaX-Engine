@@ -174,6 +174,17 @@ namespace LLaX
         }
     };
 
+    // ─── C# Scripting (.NET / Mono CoreCLR) ──────────────────────────────────
+    struct CSharpScriptComponent
+    {
+        std::string ClassName; // e.g. "Sandbox.Player", "Sandbox.Rotator"
+
+        CSharpScriptComponent() = default;
+        CSharpScriptComponent(const CSharpScriptComponent&) = default;
+        CSharpScriptComponent(const std::string& className)
+            : ClassName(className) {}
+    };
+
     // ─── Particles: ParticleEmitter ───────────────────────────────────────────
     struct ParticleEmitterComponent
     {

@@ -450,6 +450,28 @@ namespace LLaX
                 ImGui::EndMenu();
             }
 
+            if (ImGui::BeginMenu("Scripting"))
+            {
+                if (ImGui::MenuItem("Reload C# Assembly"))
+                {
+                    ScriptEngine::LoadAssembly("Assets/scripts/bin/LLaX-ScriptCore.dll");
+                }
+
+                if (ImGui::MenuItem("Recompile C# Assembly"))
+                {
+                    system("dotnet build \"LLaX-ScriptCore/LLaX-ScriptCore.csproj\" -c Release");
+                    ScriptEngine::LoadAssembly("Assets/scripts/bin/LLaX-ScriptCore.dll");
+                }
+
+                ImGui::Separator();
+                if (ScriptEngine::IsInitialized())
+                    ImGui::TextColored(ImVec4(0.25f, 0.88f, 0.45f, 1.0f), "  .NET Host: Active");
+                else
+                    ImGui::TextColored(ImVec4(0.95f, 0.78f, 0.20f, 1.0f), "  .NET Host: Inactive");
+
+                ImGui::EndMenu();
+            }
+
             if (ImGui::BeginMenu("Help"))
             {
                 if (ImGui::MenuItem("About LLaX Studio"))

@@ -211,6 +211,15 @@ namespace LLaX
             out << YAML::EndMap;
         }
 
+        if (entity.HasComponent<CSharpScriptComponent>())
+        {
+            out << YAML::Key << "CSharpScriptComponent";
+            out << YAML::BeginMap;
+            auto& sc = entity.GetComponent<CSharpScriptComponent>();
+            out << YAML::Key << "ClassName" << YAML::Value << sc.ClassName;
+            out << YAML::EndMap;
+        }
+
         if (entity.HasComponent<ParticleEmitterComponent>())
         {
             out << YAML::Key << "ParticleEmitterComponent";
@@ -420,6 +429,14 @@ namespace LLaX
                         pe.ColorBegin = particleEmitterComponent["ColorBegin"].as<glm::vec4>();
                     if (particleEmitterComponent["ColorEnd"])
                         pe.ColorEnd = particleEmitterComponent["ColorEnd"].as<glm::vec4>();
+                }
+
+                auto csharpScriptComponent = entity["CSharpScriptComponent"];
+                if (csharpScriptComponent)
+                {
+                    auto& sc = deserializedEntity.AddComponent<CSharpScriptComponent>();
+                    if (csharpScriptComponent["ClassName"])
+                        sc.ClassName = csharpScriptComponent["ClassName"].as<std::string>();
                 }
             }
         }

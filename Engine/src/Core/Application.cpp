@@ -3,6 +3,7 @@
 #include "Renderer/Renderer.h"
 #include "Audio/AudioSystem.h"
 #include "Scene/ParticleSystem.h"
+#include "Scripting/ScriptEngine.h"
 
 #include <GLFW/glfw3.h>
 
@@ -24,6 +25,7 @@ namespace LLaX
         Renderer::Init();
         AudioSystem::Init();
         ParticleSystem::Init(10000);
+        ScriptEngine::Init();
 
         m_ImGuiLayer = new ImGuiLayer();
         PushOverlay(m_ImGuiLayer);
@@ -31,6 +33,7 @@ namespace LLaX
 
     Application::~Application()
     {
+        ScriptEngine::Shutdown();
         ParticleSystem::Shutdown();
         AudioSystem::Shutdown();
         Renderer::Shutdown();

@@ -4,6 +4,7 @@
 #include "ParticleSystem.h"
 #include "Renderer/Renderer2D.h"
 #include "Audio/AudioSystem.h"
+#include "Scripting/ScriptEngine.h"
 #include "Core/Log.h"
 #include <glm/glm.hpp>
 
@@ -152,10 +153,30 @@ namespace LLaX
                 audio._Playing = true;
             }
         }
+
+        // C# Scripting Runtime Start
+        ScriptEngine::OnRuntimeStart(this);
+        {
+            auto view = m_Registry.view<CSharpScriptComponent>();
+            for (auto entity : view)
+            {
+                ScriptEngine::OnCreateEntity(Entity{ entity, this });
+            }
+        }
     }
 
     void Scene::OnPhysics2DStop()
     {
+        // Destroy C# Script Instances
+        {
+            auto view = m_Registry.view<CSharpScriptComponent>();
+            for (auto entity : view)
+            {
+                ScriptEngine::OnDestroyEntity(Entity{ entity, this });
+            }
+        }
+        ScriptEngine::OnRuntimeStop();
+
         // Destroy Native Scripts
         {
             m_Registry.view<NativeScriptComponent>().each([=](auto entity, auto& nsc) {
@@ -258,6 +279,15 @@ namespace LLaX
 
                 nsc.Instance->OnUpdate(ts);
             });
+        }
+
+        // 1.5. Update C# Scripts (.NET / Mono)
+        {
+            auto view = m_Registry.view<CSharpScriptComponent>();
+            for (auto entity : view)
+            {
+                ScriptEngine::OnUpdateEntity(Entity{ entity, this }, ts);
+            }
         }
 
         // 2. Physics step
