@@ -93,6 +93,8 @@ set(ENGINE_SOURCES
     # Vendor
     vendor/stb_image/stb_image.h
     vendor/stb_image/stb_image.cpp
+    vendor/ImGuizmo/ImGuizmo.h
+    vendor/ImGuizmo/ImGuizmo.cpp
 )
 
 add_library(LLaXEngine STATIC ${ENGINE_SOURCES})
@@ -101,6 +103,7 @@ target_include_directories(LLaXEngine PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vendor>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vendor/stb_image>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/vendor/ImGuizmo>
     $<INSTALL_INTERFACE:include>
 )
 

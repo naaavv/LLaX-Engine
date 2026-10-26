@@ -1,6 +1,7 @@
 #include "EditorLayer.h"
 #include <imgui.h>
 #include <imgui_internal.h>
+#include <ImGuizmo.h>
 #include <filesystem>
 
 // ── Lightweight text "icons" (no font atlas needed) ────────────────────────
@@ -305,36 +306,34 @@ namespace LLaX
             {
                 s_FirstLayout = false;
 
-                // Wipe any previous layout so we always get a fresh split
+                // Clean reset of existing configuration
                 ImGui::DockBuilderRemoveNode(dockspace_id);
                 ImGui::DockBuilderAddNode(dockspace_id, dockspace_flags | ImGuiDockNodeFlags_DockSpace);
                 ImGui::DockBuilderSetNodeSize(dockspace_id, ImGui::GetMainViewport()->WorkSize);
 
-                ImGuiID dock_main   = dockspace_id;
+                ImGuiID dock_main = dockspace_id;
 
-                // ── Split: left panel (Scene Hierarchy) — 18 % wide ──────────
+                // Left: Hierarchy (20%)
                 ImGuiID dock_left;
-                ImGuiID dock_center_and_right = ImGui::DockBuilderSplitNode(dock_main, ImGuiDir_Left, 0.18f, &dock_left, &dock_main);
+                ImGuiID dock_remainder = ImGui::DockBuilderSplitNode(dock_main, ImGuiDir_Left, 0.20f, &dock_left, &dock_main);
 
-                // ── Split: right panel (Properties) — 22 % of remainder ──────
+                // Right: Inspector / Properties (24%)
                 ImGuiID dock_right;
-                ImGuiID dock_center_and_bottom = ImGui::DockBuilderSplitNode(dock_main, ImGuiDir_Right, 0.22f, &dock_right, &dock_main);
+                ImGuiID dock_center_area = ImGui::DockBuilderSplitNode(dock_main, ImGuiDir_Right, 0.24f, &dock_right, &dock_main);
 
-                // ── Split: bottom strip (Content Browser + Console + Stats) ──
+                // Bottom: Browser, Console, Stats (30%)
                 ImGuiID dock_bottom;
-                ImGuiID dock_center = ImGui::DockBuilderSplitNode(dock_main, ImGuiDir_Down, 0.26f, &dock_bottom, &dock_main);
+                ImGuiID dock_center_top = ImGui::DockBuilderSplitNode(dock_main, ImGuiDir_Down, 0.30f, &dock_bottom, &dock_main);
 
-                // ── Split bottom: left → Content Browser, right → Console ────
-                ImGuiID dock_bottom_left;
-                ImGuiID dock_bottom_right;
-                ImGui::DockBuilderSplitNode(dock_bottom, ImGuiDir_Left, 0.55f, &dock_bottom_left, &dock_bottom_right);
+                // Split bottom into Content Browser (50%) and Console / Stats (50%)
+                ImGuiID dock_bottom_left, dock_bottom_right;
+                ImGui::DockBuilderSplitNode(dock_bottom, ImGuiDir_Left, 0.52f, &dock_bottom_left, &dock_bottom_right);
 
-                // ── Top strip (above viewport): Toolbar ───────────────────────
-                ImGuiID dock_toolbar;
-                ImGuiID dock_viewport;
-                ImGui::DockBuilderSplitNode(dock_center, ImGuiDir_Up, 0.06f, &dock_toolbar, &dock_viewport);
+                // Top: Toolbar (5%)
+                ImGuiID dock_toolbar, dock_viewport;
+                ImGui::DockBuilderSplitNode(dock_center_top, ImGuiDir_Up, 0.055f, &dock_toolbar, &dock_viewport);
 
-                // Assign windows to nodes
+                // Dock individual windows
                 ImGui::DockBuilderDockWindow("Scene Hierarchy",  dock_left);
                 ImGui::DockBuilderDockWindow("Properties",       dock_right);
                 ImGui::DockBuilderDockWindow("Content Browser",  dock_bottom_left);
@@ -343,7 +342,6 @@ namespace LLaX
                 ImGui::DockBuilderDockWindow("Viewport",         dock_viewport);
                 ImGui::DockBuilderDockWindow("##Toolbar",        dock_toolbar);
 
-                // Make Toolbar node non-resizable / no tab bar
                 if (ImGuiDockNode* toolbarNode = ImGui::DockBuilderGetNode(dock_toolbar))
                 {
                     toolbarNode->LocalFlags |= ImGuiDockNodeFlags_NoTabBar
@@ -617,6 +615,54 @@ namespace LLaX
                     }
                 }
                 ImGui::EndDragDropTarget();
+            }
+
+            // ── ImGuizmo 3D/2D Manipulation Gizmos ───────────────────────────
+            Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
+            if (selectedEntity && m_GizmoType > 0 && m_SceneState == SceneState::Edit)
+            {
+                ImGuizmo::SetOrthographic(true);
+                ImGuizmo::SetDrawlist();
+
+                ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y,
+                    m_ViewportBounds[1].x - m_ViewportBounds[0].x,
+                    m_ViewportBounds[1].y - m_ViewportBounds[0].y);
+
+                // Camera matrices
+                const glm::mat4& cameraProjection = m_CameraController.GetCamera().GetProjectionMatrix();
+                glm::mat4 cameraView = m_CameraController.GetCamera().GetViewMatrix();
+
+                // Entity transform
+                auto& tc = selectedEntity.GetComponent<TransformComponent>();
+                glm::mat4 transform = tc.GetTransform();
+
+                // Snapping
+                bool snap = Input::IsKeyPressed(Key::LeftControl);
+                float snapValue = 0.5f; // 0.5m for translation/scale
+                if (m_GizmoType == 2)
+                    snapValue = 45.0f; // 45 deg for rotation
+
+                float snapValues[3] = { snapValue, snapValue, snapValue };
+
+                ImGuizmo::OPERATION operation = ImGuizmo::TRANSLATE;
+                if (m_GizmoType == 1) operation = ImGuizmo::TRANSLATE;
+                else if (m_GizmoType == 2) operation = ImGuizmo::ROTATE;
+                else if (m_GizmoType == 3) operation = ImGuizmo::SCALE;
+
+                ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
+                    operation, ImGuizmo::LOCAL, glm::value_ptr(transform),
+                    nullptr, snap ? snapValues : nullptr);
+
+                if (ImGuizmo::IsUsing())
+                {
+                    glm::vec3 translation, rotation, scale;
+                    ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(transform),
+                        glm::value_ptr(translation), glm::value_ptr(rotation), glm::value_ptr(scale));
+
+                    tc.Translation = translation;
+                    tc.Rotation = glm::radians(rotation);
+                    tc.Scale = scale;
+                }
             }
 
             ImGui::End();
