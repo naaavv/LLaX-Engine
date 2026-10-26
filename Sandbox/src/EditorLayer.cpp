@@ -181,6 +181,68 @@ namespace LLaX
         }
     }
 
+    void EditorLayer::ExportProject()
+    {
+        std::filesystem::path outFolder = "ExportedGame";
+        std::filesystem::create_directories(outFolder);
+        std::filesystem::create_directories(outFolder / "Assets");
+        std::filesystem::create_directories(outFolder / "Assets" / "scenes");
+
+        // 1. Copy LLaXRuntime.exe
+        std::filesystem::path runtimeSrc = "bin/LLaXRuntime.exe";
+        if (!std::filesystem::exists(runtimeSrc))
+            runtimeSrc = "out/build/x64-debug/bin/LLaXRuntime.exe";
+
+        if (std::filesystem::exists(runtimeSrc))
+        {
+            std::filesystem::copy_file(runtimeSrc, outFolder / "LLaXRuntime.exe", std::filesystem::copy_options::overwrite_existing);
+        }
+
+        // 2. Save active scene as Main.llax
+        SceneSerializer serializer(m_ActiveScene);
+        serializer.Serialize((outFolder / "Assets" / "scenes" / "Main.llax").string());
+
+        // 3. Copy Assets directory
+        if (std::filesystem::exists("Assets"))
+        {
+            for (const auto& entry : std::filesystem::recursive_directory_iterator("Assets"))
+            {
+                const auto& path = entry.path();
+                auto relative = std::filesystem::relative(path, "Assets");
+                auto dest = outFolder / "Assets" / relative;
+
+                if (entry.is_directory())
+                    std::filesystem::create_directories(dest);
+                else
+                    std::filesystem::copy_file(path, dest, std::filesystem::copy_options::overwrite_existing);
+            }
+        }
+
+        LLAX_INFO("[Export] Standalone Game Package exported successfully to: '{0}'", outFolder.string());
+    }
+
+    void EditorLayer::RunStandalone()
+    {
+        std::filesystem::create_directories("Assets/scenes");
+        SceneSerializer serializer(m_ActiveScene);
+        serializer.Serialize("Assets/scenes/Main.llax");
+
+        std::filesystem::path runtimeSrc = "bin/LLaXRuntime.exe";
+        if (!std::filesystem::exists(runtimeSrc))
+            runtimeSrc = "out/build/x64-debug/bin/LLaXRuntime.exe";
+
+        if (std::filesystem::exists(runtimeSrc))
+        {
+            std::string cmd = "start \"\" \"" + runtimeSrc.string() + "\" --scene Assets/scenes/Main.llax";
+            system(cmd.c_str());
+            LLAX_INFO("[Runtime] Launched Standalone Game Player: '{0}'", runtimeSrc.string());
+        }
+        else
+        {
+            LLAX_WARN("[Runtime] LLaXRuntime.exe not found at '{0}'. Build the project first.", runtimeSrc.string());
+        }
+    }
+
     void EditorLayer::OnScenePlay()
     {
         m_SceneState = SceneState::Play;
@@ -406,6 +468,14 @@ namespace LLaX
 
                 if (ImGui::MenuItem(ICON_SAVEAS " Save Scene As...", "Ctrl+Shift+S"))
                     SaveSceneAs();
+
+                ImGui::Separator();
+
+                if (ImGui::MenuItem("Export Standalone Game Package...", "Ctrl+Shift+B"))
+                    ExportProject();
+
+                if (ImGui::MenuItem("Launch Standalone Game Player", "F6"))
+                    RunStandalone();
 
                 ImGui::Separator();
                 if (ImGui::MenuItem("Exit", "Alt+F4"))
@@ -969,6 +1039,17 @@ namespace LLaX
                     if (selected)
                         m_SceneHierarchyPanel.SetSelectedEntity(m_ActiveScene->DuplicateEntity(selected));
                 }
+                break;
+            }
+            case Key::B:
+            {
+                if (control && shift)
+                    ExportProject();
+                break;
+            }
+            case Key::F6:
+            {
+                RunStandalone();
                 break;
             }
             case Key::F5:

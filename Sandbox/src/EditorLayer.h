@@ -37,6 +37,8 @@ namespace LLaX
         void OpenScene(const std::filesystem::path& path);
         void SaveScene();
         void SaveSceneAs();
+        void ExportProject();
+        void RunStandalone();
 
         void OnScenePlay();
         void OnSceneStop();

@@ -166,12 +166,36 @@ Last Updated: 2026-10-26
        🎯 MILESTONE: Click any entity directly in the Viewport to select & inspect it! ✅
 
 ================================================================================
+[ PHASE 7: SCRIPTING, DEBUGGING & STANDALONE PLAYER ] ✅ COMPLETE
+================================================================================
+[x] 1. 2D Physics Collider Wireframe Debug Overlay:
+       - Batched line rendering in Renderer2D (DrawLine, DrawRect, DrawCircle)
+       - BoxCollider2D & CircleCollider2D green wireframes projected in Viewport
+       - Real-time collider visualization togglable in Viewport overlay & View menu
+       🎯 MILESTONE: Visual confirmation of Box2D colliders directly in the Viewport! ✅
+[x] 2. C# Scripting Engine (.NET CoreCLR / Mono):
+       - ScriptEngine hosting Microsoft .NET CoreCLR hostfxr runtime
+       - CSharpScriptComponent for entities with Inspector integration
+       - LLaX-ScriptCore C# standard library with Entity, Vector3, Input, Log classes
+       - UnmanagedCallersOnly native interop with zero-overhead C callbacks
+       - Runtime C# script compilation & live assembly reloading
+       🎯 MILESTONE: Custom C# scripts (e.g. Player, Rotator) control entities in Play mode! ✅
+[x] 3. Standalone Game Runtime Player & Exporter:
+       - Dedicated LLaXRuntime executable target running games without Editor overhead
+       - Direct scene loading via command line or default Assets/scenes/Main.llax
+       - Immediate simulation loop, camera projection, and input processing
+       - Editor "Export Standalone Game Package..." action (Ctrl+Shift+B)
+       - Editor "Launch Standalone Game Player" action (F6)
+       🎯 MILESTONE: One-click export and launch of standalone packaged games! ✅
+
+================================================================================
                            RECOMMENDED IMMEDIATE NEXT STEP
 ================================================================================
-👉 Phase 6 Complete! ImGuizmo transform gizmos and pixel-perfect Viewport
-   mouse picking / selection are fully functional and integrated.
-   Ready for next milestone (e.g. 2D Physics runtime debugging lines,
-   Standalone Game Project Exporter, or C# Scripting with Mono).
+👉 All Phases 1-7 are complete! The LLaX Engine foundation, Renderer2D, ECS,
+   Persistence (.llax), Physics (Box2D), Audio (miniaudio), Particles,
+   ImGuizmo Gizmos, Pixel-Perfect Mouse Picking, Physics Wireframes,
+   C# Scripting (.NET), and Standalone Game Runtime & Exporter are all fully working.
+   Ready for building game demos or publishing!
 
 ================================================================================
                            LEARNING RESOURCES
