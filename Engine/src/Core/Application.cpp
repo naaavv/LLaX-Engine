@@ -1,6 +1,8 @@
 #include "Application.h"
 #include "Log.h"
 #include "Renderer/Renderer.h"
+#include "Audio/AudioSystem.h"
+#include "Scene/ParticleSystem.h"
 
 #include <GLFW/glfw3.h>
 
@@ -8,7 +10,7 @@ namespace LLaX
 {
     Application* Application::s_Instance = nullptr;
 
-    Application::Application(const std::string& name)
+    Application::Application(const std::string& name, uint32_t width, uint32_t height)
     {
         LLAX_CORE_ASSERT(!s_Instance, "Application already exists!");
         s_Instance = this;
@@ -16,10 +18,12 @@ namespace LLaX
         Log::Init();
         LLAX_CORE_INFO("Initializing LLaX Engine...");
 
-        m_Window = CreateScope<Window>(WindowProps(name));
+        m_Window = CreateScope<Window>(WindowProps(name, width, height));
         m_Window->SetEventCallback(LLAX_BIND_EVENT_FN(Application::OnEvent));
 
         Renderer::Init();
+        AudioSystem::Init();
+        ParticleSystem::Init(10000);
 
         m_ImGuiLayer = new ImGuiLayer();
         PushOverlay(m_ImGuiLayer);
@@ -27,6 +31,8 @@ namespace LLaX
 
     Application::~Application()
     {
+        ParticleSystem::Shutdown();
+        AudioSystem::Shutdown();
         Renderer::Shutdown();
         LLAX_CORE_INFO("LLaX Engine terminated.");
         Log::Shutdown();

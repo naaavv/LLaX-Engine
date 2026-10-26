@@ -1,4 +1,5 @@
 #include "Log.h"
+#include "LogSink.h"
 
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/basic_file_sink.h>
@@ -18,6 +19,7 @@ namespace LLaX
         // ── Sinks ────────────────────────────────────────────────────────────
         // 1. Colorized console sink  (Debug builds only — removed in Release)
         // 2. Rotating file sink: keeps logs/LLaX.log, max 5 MB, 3 rotated files
+        // 3. In-memory editor console sink for ImGui Console Panel
         auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
         consoleSink->set_pattern("%^[%H:%M:%S.%e] [%l] %n: %v%$");
 
@@ -26,24 +28,26 @@ namespace LLaX
             5 * 1024 * 1024,  // 5 MB per file
             3                  // keep 3 rotated files
         );
-        // File sink uses a plain pattern — no ANSI color codes in log files
         fileSink->set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%l] [%n] %v");
+
+        auto editorSink = std::make_shared<EditorLogSink>(1000);
+        editorSink->set_pattern("%v");
 
         // ── Core logger (Engine internals) ───────────────────────────────────
         s_CoreLogger = std::make_shared<spdlog::logger>(
             "LLaX",
-            spdlog::sinks_init_list{ consoleSink, fileSink }
+            spdlog::sinks_init_list{ consoleSink, fileSink, editorSink }
         );
         s_CoreLogger->set_level(spdlog::level::trace);
-        s_CoreLogger->flush_on(spdlog::level::err); // flush to disk on every error+
+        s_CoreLogger->flush_on(spdlog::level::trace);
 
         // ── Client logger (Sandbox / game code) ─────────────────────────────
         s_ClientLogger = std::make_shared<spdlog::logger>(
             "APP",
-            spdlog::sinks_init_list{ consoleSink, fileSink }
+            spdlog::sinks_init_list{ consoleSink, fileSink, editorSink }
         );
         s_ClientLogger->set_level(spdlog::level::trace);
-        s_ClientLogger->flush_on(spdlog::level::err);
+        s_ClientLogger->flush_on(spdlog::level::trace);
 
         // Register with spdlog's global registry so they survive scope changes
         spdlog::register_logger(s_CoreLogger);

@@ -1,5 +1,13 @@
 set(SANDBOX_SOURCES
     src/SandboxApp.cpp
+    src/EditorLayer.h
+    src/EditorLayer.cpp
+    src/Panels/SceneHierarchyPanel.h
+    src/Panels/SceneHierarchyPanel.cpp
+    src/Panels/ContentBrowserPanel.h
+    src/Panels/ContentBrowserPanel.cpp
+    src/Panels/ConsolePanel.h
+    src/Panels/ConsolePanel.cpp
 )
 
 add_executable(Sandbox ${SANDBOX_SOURCES})

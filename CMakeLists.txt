@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5 CACHE STRING "" FORCE)
 
 project(LLaX-Engine
     VERSION 0.1.0
@@ -21,6 +22,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Fetch Dependencies via FetchContent
+set(FETCHCONTENT_UPDATES_DISCONNECTED ON)
 include(FetchContent)
 
 # 1. GLFW
@@ -77,8 +79,42 @@ FetchContent_Declare(
     GIT_SHALLOW TRUE
 )
 
+# 6. EnTT (Entity Component System)
+message(STATUS "[LLaX] Configuring EnTT...")
+FetchContent_Declare(
+    entt
+    GIT_REPOSITORY https://github.com/skypjack/entt.git
+    GIT_TAG v3.13.2
+    GIT_SHALLOW TRUE
+)
+
+# 7. yaml-cpp (YAML Parser & Emitter)
+message(STATUS "[LLaX] Configuring yaml-cpp...")
+set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "" FORCE)
+set(YAML_CPP_BUILD_CONTRIB OFF CACHE BOOL "" FORCE)
+set(YAML_BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+FetchContent_Declare(
+    yaml-cpp
+    GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
+    GIT_TAG 0.8.0
+    GIT_SHALLOW TRUE
+)
+
+# 8. Box2D (2D Physics)
+message(STATUS "[LLaX] Configuring Box2D...")
+set(BOX2D_BUILD_UNIT_TESTS OFF CACHE BOOL "" FORCE)
+set(BOX2D_BUILD_TESTBED     OFF CACHE BOOL "" FORCE)
+set(BOX2D_BUILD_DOCS        OFF CACHE BOOL "" FORCE)
+FetchContent_Declare(
+    box2d
+    GIT_REPOSITORY https://github.com/erincatto/box2d.git
+    GIT_TAG v2.4.1
+    GIT_SHALLOW TRUE
+)
+
 message(STATUS "[LLaX] Fetching CMake dependencies...")
-FetchContent_MakeAvailable(glfw glad glm spdlog)
+FetchContent_MakeAvailable(glfw glad glm spdlog entt yaml-cpp box2d)
 
 FetchContent_GetProperties(imgui)
 if(NOT imgui_POPULATED)

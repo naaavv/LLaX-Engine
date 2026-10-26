@@ -34,6 +34,7 @@ bin-int/
 *.ilk
 *.exp
 
-# OS generated
-.DS_Store
-Thumbs.db
+# Logs & ImGui settings
+logs/
+*.log
+imgui.ini

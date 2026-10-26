@@ -1,4 +1,5 @@
 #include "Renderer.h"
+#include "Renderer2D.h"
 #include "Core/Log.h"
 #include <glad/glad.h>
 
@@ -10,10 +11,13 @@ namespace LLaX
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_DEPTH_TEST);
+
+        Renderer2D::Init();
     }
 
     void Renderer::Shutdown()
     {
+        Renderer2D::Shutdown();
         LLAX_CORE_INFO("Renderer shutdown.");
     }
 
@@ -30,5 +34,12 @@ namespace LLaX
     void Renderer::Clear()
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+
+    void Renderer::Submit(const Ref<Shader>& shader, const Ref<VertexArray>& vertexArray)
+    {
+        shader->Bind();
+        vertexArray->Bind();
+        glDrawElements(GL_TRIANGLES, vertexArray->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, nullptr);
     }
 }

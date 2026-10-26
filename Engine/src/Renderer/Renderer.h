@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Core/Base.h"
+#include "Renderer/VertexArray.h"
+#include "Renderer/Shader.h"
 #include <glm/glm.hpp>
 
 namespace LLaX
@@ -13,5 +16,7 @@ namespace LLaX
         static void SetViewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
         static void SetClearColor(const glm::vec4& color);
         static void Clear();
+
+        static void Submit(const Ref<Shader>& shader, const Ref<VertexArray>& vertexArray);
     };
 }
