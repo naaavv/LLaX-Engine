@@ -28,6 +28,7 @@ namespace LLaX
 
         // 1. Framebuffer setup (off-screen render target)
         FramebufferSpecification fbSpec;
+        fbSpec.Attachments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::DEPTH24STENCIL8 };
         fbSpec.Width = 1280;
         fbSpec.Height = 720;
         m_Framebuffer = Framebuffer::Create(fbSpec);
@@ -237,6 +238,9 @@ namespace LLaX
         Renderer::SetClearColor(m_ClearColor);
         Renderer::Clear();
 
+        // Clear red-integer entity ID attachment to -1
+        m_Framebuffer->ClearAttachment(1, -1);
+
         Renderer2D::ResetStats();
 
         switch (m_SceneState)
@@ -259,6 +263,28 @@ namespace LLaX
                 m_ActiveScene->OnUpdateRuntime(0.0f);
                 break;
             }
+        }
+
+        // Viewport mouse picking: read pixel under cursor
+        auto [mx, my] = ImGui::GetMousePos();
+        mx -= m_ViewportBounds[0].x;
+        my -= m_ViewportBounds[0].y;
+        glm::vec2 viewportSize = m_ViewportBounds[1] - m_ViewportBounds[0];
+        my = viewportSize.y - my; // Invert Y for OpenGL texture coordinates
+
+        int mouseX = (int)mx;
+        int mouseY = (int)my;
+
+        if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
+        {
+            int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY);
+            m_HoveredEntity = (pixelData == -1 || !m_ActiveScene->Reg().valid((entt::entity)pixelData))
+                ? Entity{}
+                : Entity{ (entt::entity)pixelData, m_ActiveScene.get() };
+        }
+        else
+        {
+            m_HoveredEntity = Entity{};
         }
 
         m_Framebuffer->Unbind();
@@ -578,6 +604,13 @@ namespace LLaX
 
                     if (ImGui::IsItemHovered())
                         ImGui::SetTooltip("Toggle Viewport Coordinate Grid");
+
+                    if (m_HoveredEntity)
+                    {
+                        ImGui::Separator();
+                        ImGui::TextColored(ImVec4(0.35f, 0.75f, 1.0f, 1.0f), "Hover: %s",
+                            m_HoveredEntity.GetComponent<TagComponent>().Tag.c_str());
+                    }
                 }
                 ImGui::End();
                 ImGui::PopStyleVar(3);
@@ -954,6 +987,11 @@ namespace LLaX
 
     bool EditorLayer::OnMouseButtonPressed(MouseButtonPressedEvent& e)
     {
+        if (e.GetMouseButton() == Mouse::ButtonLeft)
+        {
+            if (m_ViewportHovered && !ImGuizmo::IsOver() && !Input::IsKeyPressed(Key::LeftAlt) && !ImGui::IsAnyItemHovered())
+                m_SceneHierarchyPanel.SetSelectedEntity(m_HoveredEntity);
+        }
         return false;
     }
 

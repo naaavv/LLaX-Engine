@@ -227,9 +227,9 @@ namespace LLaX
         {
             auto [transform, sprite] = view.get<TransformComponent, SpriteRendererComponent>(entity);
             if (sprite.Texture)
-                Renderer2D::DrawQuad(transform.GetTransform(), sprite.Texture, sprite.TilingFactor, sprite.Color);
+                Renderer2D::DrawQuad(transform.GetTransform(), sprite.Texture, sprite.TilingFactor, sprite.Color, (int)(uint32_t)entity);
             else
-                Renderer2D::DrawQuad(transform.GetTransform(), sprite.Color);
+                Renderer2D::DrawQuad(transform.GetTransform(), sprite.Color, (int)(uint32_t)entity);
         }
 
         // Particles (preview in editor too)
@@ -343,9 +343,9 @@ namespace LLaX
             {
                 auto [transform, sprite] = sprites.get<TransformComponent, SpriteRendererComponent>(entity);
                 if (sprite.Texture)
-                    Renderer2D::DrawQuad(transform.GetTransform(), sprite.Texture, sprite.TilingFactor, sprite.Color);
+                    Renderer2D::DrawQuad(transform.GetTransform(), sprite.Texture, sprite.TilingFactor, sprite.Color, (int)(uint32_t)entity);
                 else
-                    Renderer2D::DrawQuad(transform.GetTransform(), sprite.Color);
+                    Renderer2D::DrawQuad(transform.GetTransform(), sprite.Color, (int)(uint32_t)entity);
             }
 
             // Particles

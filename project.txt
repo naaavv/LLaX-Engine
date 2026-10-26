@@ -149,12 +149,29 @@ Last Updated: 2026-10-26
        🎯 MILESTONE: Custom C++ game logic executes dynamically per entity! ✅
 
 ================================================================================
+[ PHASE 6: GIZMOS, SELECTION & ADVANCED EDITOR TOOLS ] ✅ COMPLETE
+================================================================================
+[x] 1. ImGuizmo Transform Manipulation:
+       - 2D/3D Gizmos rendered in Viewport (Translate, Rotate, Scale)
+       - Unity-style toolbar modes: Q (Hand/Select), W (Translate), E (Rotate), R (Scale)
+       - Snapping support with Ctrl modifier (0.5m grid / 45° rotation)
+       🎯 MILESTONE: Selected entities can be translated, rotated, and scaled in Viewport! ✅
+[x] 2. Pixel-Perfect Mouse Picking:
+       - Multi-render target (MRT) Framebuffer with RED_INTEGER attachment (Entity ID)
+       - Renderer2D QuadVertex pipeline passing int EntityID through vertex to fragment shader
+       - Fragment shader writing entity ID to secondary output buffer
+       - OpenGL glReadPixels integer reading from attachment 1
+       - Viewport cursor hover detection displaying active entity tag in overlay
+       - Left-click entity selection in Viewport instantly syncing Scene Hierarchy & Inspector
+       🎯 MILESTONE: Click any entity directly in the Viewport to select & inspect it! ✅
+
+================================================================================
                            RECOMMENDED IMMEDIATE NEXT STEP
 ================================================================================
-👉 Phase 5 Complete! All Engine Foundation, Rendering, ECS, Persistence,
-   Physics, Audio, Particles, and Native C++ Scripting are fully working.
-   Ready for engine extension (e.g. ImGuizmo 3D gizmos, scene demo packaging,
-   or Mono embedding).
+👉 Phase 6 Complete! ImGuizmo transform gizmos and pixel-perfect Viewport
+   mouse picking / selection are fully functional and integrated.
+   Ready for next milestone (e.g. 2D Physics runtime debugging lines,
+   Standalone Game Project Exporter, or C# Scripting with Mono).
 
 ================================================================================
                            LEARNING RESOURCES

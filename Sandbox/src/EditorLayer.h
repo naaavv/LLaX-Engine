@@ -85,5 +85,6 @@ namespace LLaX
         glm::vec4 m_ClearColor{ 0.192f, 0.212f, 0.231f, 1.0f }; // Unity style neutral dark gray viewport background
         bool m_ShowGrid = true;
         int m_GizmoType = 0; // 0: Select, 1: Translate, 2: Rotate, 3: Scale
+        Entity m_HoveredEntity;
     };
 }
