@@ -25,6 +25,10 @@ namespace LLaX
         void OnUpdateEditor(Timestep ts, OrthographicCamera& camera);
         void OnUpdateRuntime(Timestep ts);
         void OnViewportResize(uint32_t width, uint32_t height);
+        void OnRenderPhysicsDebug();
+
+        void SetPhysicsDebug(bool enable) { m_ShowPhysicsColliders = enable; }
+        bool GetPhysicsDebug() const { return m_ShowPhysicsColliders; }
 
         // Physics lifecycle (called by EditorLayer on Play/Stop)
         void OnPhysics2DStart();
@@ -50,6 +54,7 @@ namespace LLaX
 
         // Box2D physics world (null when not in play mode)
         b2World*       m_PhysicsWorld   = nullptr;
+        bool           m_ShowPhysicsColliders = true;
 
         friend class Entity;
         friend class SceneHierarchyPanel;

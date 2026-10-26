@@ -236,6 +236,10 @@ namespace LLaX
         ParticleSystem::OnUpdate(ts);
         ParticleSystem::OnRender();
 
+        // 2D Physics Colliders wireframe debug
+        if (m_ShowPhysicsColliders)
+            OnRenderPhysicsDebug();
+
         Renderer2D::EndScene();
     }
 
@@ -351,7 +355,54 @@ namespace LLaX
             // Particles
             ParticleSystem::OnRender();
 
+            // 2D Physics Colliders wireframe debug
+            if (m_ShowPhysicsColliders)
+                OnRenderPhysicsDebug();
+
             Renderer2D::EndScene();
+        }
+    }
+
+    void Scene::OnRenderPhysicsDebug()
+    {
+        const glm::vec4 colliderColor(0.2f, 0.95f, 0.3f, 1.0f); // Bright green collider wireframe
+
+        // 1. Box Colliders
+        {
+            auto view = m_Registry.view<TransformComponent, BoxCollider2DComponent>();
+            for (auto entity : view)
+            {
+                auto [tc, bc] = view.get<TransformComponent, BoxCollider2DComponent>(entity);
+
+                glm::vec3 translation = tc.Translation + glm::vec3(bc.Offset, 0.001f);
+                glm::vec3 scale = tc.Scale * glm::vec3(bc.Size * 2.0f, 1.0f);
+
+                glm::mat4 rotation = glm::toMat4(glm::quat(tc.Rotation));
+                glm::mat4 transform = glm::translate(glm::mat4(1.0f), translation)
+                    * rotation
+                    * glm::scale(glm::mat4(1.0f), scale);
+
+                Renderer2D::DrawRect(transform, colliderColor);
+            }
+        }
+
+        // 2. Circle Colliders
+        {
+            auto view = m_Registry.view<TransformComponent, CircleCollider2DComponent>();
+            for (auto entity : view)
+            {
+                auto [tc, cc] = view.get<TransformComponent, CircleCollider2DComponent>(entity);
+
+                glm::vec3 translation = tc.Translation + glm::vec3(cc.Offset, 0.001f);
+                glm::vec3 scale = tc.Scale * glm::vec3(cc.Radius * 2.0f);
+
+                glm::mat4 rotation = glm::toMat4(glm::quat(tc.Rotation));
+                glm::mat4 transform = glm::translate(glm::mat4(1.0f), translation)
+                    * rotation
+                    * glm::scale(glm::mat4(1.0f), scale);
+
+                Renderer2D::DrawCircle(transform, 0.5f, colliderColor);
+            }
         }
     }
 

@@ -39,6 +39,16 @@ namespace LLaX
         static void DrawQuad(const glm::mat4& transform, const Ref<Texture2D>& texture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f), int entityID = -1);
         static void DrawQuad(const glm::mat4& transform, const Ref<SubTexture2D>& subtexture, float tilingFactor = 1.0f, const glm::vec4& tintColor = glm::vec4(1.0f), int entityID = -1);
 
+        // Line / Wireframe drawing (physics debug)
+        static void DrawLine(const glm::vec3& p0, const glm::vec3& p1, const glm::vec4& color);
+        static void DrawRect(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color);
+        static void DrawRect(const glm::mat4& transform, const glm::vec4& color);
+        static void DrawCircle(const glm::vec3& center, float radius, const glm::vec4& color, int segments = 48);
+        static void DrawCircle(const glm::mat4& transform, float radius, const glm::vec4& color, int segments = 48);
+
+        static void SetLineWidth(float width);
+        static float GetLineWidth();
+
         // Stats
         struct Statistics
         {
@@ -47,6 +57,7 @@ namespace LLaX
 
             uint32_t GetTotalVertexCount() const { return QuadCount * 4; }
             uint32_t GetTotalIndexCount() const { return QuadCount * 6; }
+            uint32_t LineCount = 0;
         };
 
         static void ResetStats();
@@ -55,5 +66,7 @@ namespace LLaX
     private:
         static void StartBatch();
         static void NextBatch();
+        static void FlushLines();
+        static void NextLineBatch();
     };
 }

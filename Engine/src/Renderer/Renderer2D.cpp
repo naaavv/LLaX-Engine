@@ -20,6 +20,12 @@ namespace LLaX
         int EntityID;
     };
 
+    struct LineVertex
+    {
+        glm::vec3 Position;
+        glm::vec4 Color;
+    };
+
     struct Renderer2DData
     {
         static const uint32_t MaxQuads = 20000;
@@ -27,6 +33,7 @@ namespace LLaX
         static const uint32_t MaxIndices = MaxQuads * 6;
         static const uint32_t MaxTextureSlots = 32;
 
+        // Quad batch
         Ref<VertexArray> QuadVertexArray;
         Ref<VertexBuffer> QuadVertexBuffer;
         Ref<Shader> TextureShader;
@@ -40,6 +47,20 @@ namespace LLaX
         uint32_t TextureSlotIndex = 1; // 0 is 1x1 white texture
 
         glm::vec4 QuadVertexPositions[4];
+
+        // Line batch
+        static const uint32_t MaxLines = 20000;
+        static const uint32_t MaxLineVertices = MaxLines * 2;
+
+        Ref<VertexArray> LineVertexArray;
+        Ref<VertexBuffer> LineVertexBuffer;
+        Ref<Shader> LineShader;
+
+        uint32_t LineVertexCount = 0;
+        LineVertex* LineVertexBufferBase = nullptr;
+        LineVertex* LineVertexBufferPtr = nullptr;
+
+        float LineWidth = 2.0f;
 
         Renderer2D::Statistics Stats;
     };
@@ -130,6 +151,36 @@ namespace LLaX
         }
     )";
 
+    static const char* s_LineShaderSourceVertex = R"(
+        #version 330 core
+        layout(location = 0) in vec3 a_Position;
+        layout(location = 1) in vec4 a_Color;
+
+        uniform mat4 u_ViewProjection;
+
+        out vec4 v_Color;
+
+        void main()
+        {
+            v_Color = a_Color;
+            gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
+        }
+    )";
+
+    static const char* s_LineShaderSourceFragment = R"(
+        #version 330 core
+        layout(location = 0) out vec4 o_Color;
+        layout(location = 1) out int o_EntityID;
+
+        in vec4 v_Color;
+
+        void main()
+        {
+            o_Color = v_Color;
+            o_EntityID = -1;
+        }
+    )";
+
     void Renderer2D::Init()
     {
         s_Data.QuadVertexArray = VertexArray::Create();
@@ -185,11 +236,25 @@ namespace LLaX
         s_Data.QuadVertexPositions[1] = {  0.5f, -0.5f, 0.0f, 1.0f };
         s_Data.QuadVertexPositions[2] = {  0.5f,  0.5f, 0.0f, 1.0f };
         s_Data.QuadVertexPositions[3] = { -0.5f,  0.5f, 0.0f, 1.0f };
+
+        // ── Line batch ───────────────────────────────────────────────────────
+        s_Data.LineVertexArray = VertexArray::Create();
+
+        s_Data.LineVertexBuffer = VertexBuffer::Create(s_Data.MaxLineVertices * sizeof(LineVertex));
+        s_Data.LineVertexBuffer->SetLayout({
+            { ShaderDataType::Float3, "a_Position" },
+            { ShaderDataType::Float4, "a_Color" }
+        });
+        s_Data.LineVertexArray->AddVertexBuffer(s_Data.LineVertexBuffer);
+        s_Data.LineVertexBufferBase = new LineVertex[s_Data.MaxLineVertices];
+
+        s_Data.LineShader = Shader::Create("LineShader", s_LineShaderSourceVertex, s_LineShaderSourceFragment);
     }
 
     void Renderer2D::Shutdown()
     {
         delete[] s_Data.QuadVertexBufferBase;
+        delete[] s_Data.LineVertexBufferBase;
     }
 
     void Renderer2D::BeginScene(const OrthographicCamera& camera)
@@ -201,6 +266,9 @@ namespace LLaX
     {
         s_Data.TextureShader->Bind();
         s_Data.TextureShader->SetMat4("u_ViewProjection", viewProjection);
+
+        s_Data.LineShader->Bind();
+        s_Data.LineShader->SetMat4("u_ViewProjection", viewProjection);
 
         StartBatch();
     }
@@ -214,6 +282,7 @@ namespace LLaX
     void Renderer2D::EndScene()
     {
         Flush();
+        FlushLines();
     }
 
     void Renderer2D::StartBatch()
@@ -221,6 +290,9 @@ namespace LLaX
         s_Data.QuadIndexCount = 0;
         s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
         s_Data.TextureSlotIndex = 1;
+
+        s_Data.LineVertexCount = 0;
+        s_Data.LineVertexBufferPtr = s_Data.LineVertexBufferBase;
     }
 
     void Renderer2D::Flush()
@@ -244,6 +316,28 @@ namespace LLaX
     {
         Flush();
         StartBatch();
+    }
+
+    void Renderer2D::FlushLines()
+    {
+        if (s_Data.LineVertexCount == 0)
+            return;
+
+        uint32_t dataSize = (uint32_t)((uint8_t*)s_Data.LineVertexBufferPtr - (uint8_t*)s_Data.LineVertexBufferBase);
+        s_Data.LineVertexBuffer->SetData(s_Data.LineVertexBufferBase, dataSize);
+
+        s_Data.LineShader->Bind();
+        s_Data.LineVertexArray->Bind();
+        glLineWidth(s_Data.LineWidth);
+        glDrawArrays(GL_LINES, 0, s_Data.LineVertexCount);
+        s_Data.Stats.DrawCalls++;
+    }
+
+    void Renderer2D::NextLineBatch()
+    {
+        FlushLines();
+        s_Data.LineVertexCount = 0;
+        s_Data.LineVertexBufferPtr = s_Data.LineVertexBufferBase;
     }
 
     void Renderer2D::DrawQuad(const glm::vec2& position, const glm::vec2& size, const glm::vec4& color, int entityID)
@@ -437,6 +531,91 @@ namespace LLaX
 
         s_Data.QuadIndexCount += 6;
         s_Data.Stats.QuadCount++;
+    }
+
+    void Renderer2D::DrawLine(const glm::vec3& p0, const glm::vec3& p1, const glm::vec4& color)
+    {
+        if (s_Data.LineVertexCount >= Renderer2DData::MaxLineVertices)
+            NextLineBatch();
+
+        s_Data.LineVertexBufferPtr->Position = p0;
+        s_Data.LineVertexBufferPtr->Color = color;
+        s_Data.LineVertexBufferPtr++;
+
+        s_Data.LineVertexBufferPtr->Position = p1;
+        s_Data.LineVertexBufferPtr->Color = color;
+        s_Data.LineVertexBufferPtr++;
+
+        s_Data.LineVertexCount += 2;
+        s_Data.Stats.LineCount++;
+    }
+
+    void Renderer2D::DrawRect(const glm::vec3& position, const glm::vec2& size, const glm::vec4& color)
+    {
+        glm::vec3 p0 = { position.x - size.x * 0.5f, position.y - size.y * 0.5f, position.z };
+        glm::vec3 p1 = { position.x + size.x * 0.5f, position.y - size.y * 0.5f, position.z };
+        glm::vec3 p2 = { position.x + size.x * 0.5f, position.y + size.y * 0.5f, position.z };
+        glm::vec3 p3 = { position.x - size.x * 0.5f, position.y + size.y * 0.5f, position.z };
+
+        DrawLine(p0, p1, color);
+        DrawLine(p1, p2, color);
+        DrawLine(p2, p3, color);
+        DrawLine(p3, p0, color);
+    }
+
+    void Renderer2D::DrawRect(const glm::mat4& transform, const glm::vec4& color)
+    {
+        glm::vec3 lineVertices[4];
+        for (size_t i = 0; i < 4; i++)
+            lineVertices[i] = glm::vec3(transform * s_Data.QuadVertexPositions[i]);
+
+        DrawLine(lineVertices[0], lineVertices[1], color);
+        DrawLine(lineVertices[1], lineVertices[2], color);
+        DrawLine(lineVertices[2], lineVertices[3], color);
+        DrawLine(lineVertices[3], lineVertices[0], color);
+    }
+
+    void Renderer2D::DrawCircle(const glm::vec3& center, float radius, const glm::vec4& color, int segments)
+    {
+        const float twoPi = 2.0f * 3.14159265358979323846f;
+        for (int i = 0; i < segments; i++)
+        {
+            float theta0 = ((float)i / (float)segments) * twoPi;
+            float theta1 = (((float)i + 1.0f) / (float)segments) * twoPi;
+
+            glm::vec3 p0 = { center.x + radius * cosf(theta0), center.y + radius * sinf(theta0), center.z };
+            glm::vec3 p1 = { center.x + radius * cosf(theta1), center.y + radius * sinf(theta1), center.z };
+
+            DrawLine(p0, p1, color);
+        }
+    }
+
+    void Renderer2D::DrawCircle(const glm::mat4& transform, float radius, const glm::vec4& color, int segments)
+    {
+        const float twoPi = 2.0f * 3.14159265358979323846f;
+        for (int i = 0; i < segments; i++)
+        {
+            float theta0 = ((float)i / (float)segments) * twoPi;
+            float theta1 = (((float)i + 1.0f) / (float)segments) * twoPi;
+
+            glm::vec4 p0Local = { radius * cosf(theta0), radius * sinf(theta0), 0.0f, 1.0f };
+            glm::vec4 p1Local = { radius * cosf(theta1), radius * sinf(theta1), 0.0f, 1.0f };
+
+            glm::vec3 p0 = glm::vec3(transform * p0Local);
+            glm::vec3 p1 = glm::vec3(transform * p1Local);
+
+            DrawLine(p0, p1, color);
+        }
+    }
+
+    void Renderer2D::SetLineWidth(float width)
+    {
+        s_Data.LineWidth = width;
+    }
+
+    float Renderer2D::GetLineWidth()
+    {
+        return s_Data.LineWidth;
     }
 
     void Renderer2D::ResetStats()

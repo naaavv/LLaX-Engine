@@ -241,6 +241,7 @@ namespace LLaX
         // Clear red-integer entity ID attachment to -1
         m_Framebuffer->ClearAttachment(1, -1);
 
+        m_ActiveScene->SetPhysicsDebug(m_ShowPhysicsColliders);
         Renderer2D::ResetStats();
 
         switch (m_SceneState)
@@ -421,6 +422,8 @@ namespace LLaX
                 ImGui::MenuItem("Content Browser", nullptr, &m_ShowContentBrowser);
                 ImGui::MenuItem("Console",         nullptr, &m_ShowConsole);
                 ImGui::MenuItem("Statistics",      nullptr, &m_ShowStats);
+                ImGui::Separator();
+                ImGui::MenuItem("Physics Colliders", nullptr, &m_ShowPhysicsColliders);
                 ImGui::Separator();
                 if (ImGui::MenuItem("Reset Layout"))
                     s_FirstLayout = true;
@@ -604,6 +607,15 @@ namespace LLaX
 
                     if (ImGui::IsItemHovered())
                         ImGui::SetTooltip("Toggle Viewport Coordinate Grid");
+
+                    ImGui::SameLine();
+
+                    // Physics Colliders Wireframe Toggle
+                    if (ImGui::Button(m_ShowPhysicsColliders ? "Colliders [ON]" : "Colliders [OFF]", ImVec2(90.0f, 20.0f)))
+                        m_ShowPhysicsColliders = !m_ShowPhysicsColliders;
+
+                    if (ImGui::IsItemHovered())
+                        ImGui::SetTooltip("Toggle 2D Physics Collider Wireframe Debug Overlay");
 
                     if (m_HoveredEntity)
                     {
@@ -828,6 +840,7 @@ namespace LLaX
         };
         statRow("Draw Calls", stats.DrawCalls);
         statRow("Quads",      stats.QuadCount);
+        statRow("Lines",      stats.LineCount);
         statRow("Vertices",   stats.GetTotalVertexCount());
         statRow("Indices",    stats.GetTotalIndexCount());
 
